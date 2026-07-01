@@ -1,0 +1,1541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Allianz RSA — Damage Copilot · Scale AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#08080e;--bg2:#111118;--bg3:#18181f;--bg4:#1f1f2a;--bg5:#252533;
+  --blue:#4f8ef7;--scale:#006AFF;--green:#34d399;--amber:#fbbf24;
+  --red:#f87171;--purple:#a78bfa;
+  --t1:#f0f0f5;--t2:#9090a0;--t3:#606070;--t4:#404050;
+  --b1:rgba(255,255,255,0.07);--b2:rgba(255,255,255,0.12);
+  --r:12px;--rsm:8px;
+}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t1);font-size:14px;min-height:100vh;}
+nav{display:flex;align-items:center;justify-content:space-between;padding:13px 28px;border-bottom:1px solid var(--b1);position:sticky;top:0;z-index:100;background:var(--bg);}
+.logo{width:26px;height:26px;border-radius:6px;background:var(--scale);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;}
+.nav-l{display:flex;align-items:center;gap:14px;}
+.nav-title{font-size:13px;font-weight:500;}
+.vdiv{width:1px;height:15px;background:var(--b2);}
+.nav-sub{font-size:12px;color:var(--t2);}
+.live-badge{display:flex;align-items:center;gap:5px;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.2);border-radius:99px;padding:4px 11px;font-size:11px;font-weight:500;color:var(--green);}
+.ldot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.tabs{display:flex;gap:2px;padding:0 28px;border-bottom:1px solid var(--b1);overflow-x:auto;}
+.tab{padding:12px 17px;font-size:13px;color:var(--t2);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;transition:color .15s;}
+.tab:hover{color:var(--t1);}
+.tab.active{color:var(--t1);font-weight:500;border-bottom-color:var(--scale);}
+main{padding:24px 28px;max-width:1380px;margin:0 auto;}
+.panel{display:none;}.panel.active{display:block;}
+
+/* scenario */
+.sc-bar{display:flex;gap:7px;margin-bottom:14px;align-items:center;flex-wrap:wrap;}
+.sc-btn{padding:6px 13px;font-size:12px;font-weight:500;border-radius:99px;cursor:pointer;background:var(--bg3);border:1px solid var(--b2);color:var(--t2);transition:all .15s;}
+.sc-btn.active{background:rgba(79,142,247,.12);border-color:rgba(79,142,247,.3);color:var(--blue);}
+.sc-btn:hover:not(.active){color:var(--t1);}
+
+/* sim tabs */
+.sim-tabs{display:flex;gap:3px;background:var(--bg3);border-radius:10px;padding:3px;margin-bottom:14px;width:fit-content;}
+.sim-tab{padding:7px 20px;font-size:13px;font-weight:500;border-radius:7px;cursor:pointer;color:var(--t2);background:none;border:none;transition:all .2s;}
+.sim-tab.active{background:var(--bg);color:var(--t1);box-shadow:0 1px 4px rgba(0,0,0,.4);}
+.sim-tab:hover:not(.active){color:var(--t1);}
+
+/* call status */
+.callbar{display:flex;align-items:center;justify-content:space-between;background:var(--bg3);border-radius:var(--rsm);padding:9px 14px;margin-bottom:14px;border:1px solid var(--b1);}
+.callbar-l{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--t2);}
+.timer{font-size:13px;font-variant-numeric:tabular-nums;color:var(--t2);font-weight:500;}
+
+/* transcript */
+.transcript-wrap{background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r);margin-bottom:14px;overflow:hidden;}
+.transcript-hdr{padding:9px 14px;border-bottom:1px solid var(--b1);display:flex;align-items:center;justify-content:space-between;}
+.pane-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);}
+.transcript-body{padding:10px 14px;min-height:130px;max-height:130px;overflow-y:auto;font-size:13px;line-height:1.75;}
+.transcript-body::-webkit-scrollbar{width:4px;}.transcript-body::-webkit-scrollbar-track{background:transparent;}.transcript-body::-webkit-scrollbar-thumb{background:var(--b2);border-radius:99px;}
+.tline{margin-bottom:4px;}
+.spk{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-right:5px;}
+.spk.agent{color:var(--blue);}.spk.cust{color:var(--purple);}
+.hl{background:rgba(251,191,36,.14);border-radius:3px;padding:1px 3px;color:var(--amber);}
+
+/* SPLIT */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+.iface{background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column;}
+.iface-hdr{padding:11px 14px;border-bottom:1px solid var(--b1);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.iface-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;}
+.iface-title.m{color:var(--amber);}
+.iface-title.ai{color:var(--green);}
+.ibadge{font-size:10px;padding:2px 8px;border-radius:99px;font-weight:500;}
+.ibadge.m{background:rgba(251,191,36,.1);color:var(--amber);border:1px solid rgba(251,191,36,.2);}
+.ibadge.ai{background:rgba(52,211,153,.1);color:var(--green);border:1px solid rgba(52,211,153,.2);}
+
+/* MANUAL oasis 2-level */
+.manual-body{padding:10px 12px;flex:1;display:flex;flex-direction:column;gap:8px;}
+.oasis-row{display:flex;gap:1px;font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--t4);text-transform:uppercase;margin-bottom:1px;}
+.oasis-col-lbl{flex:1;text-align:center;}
+.oasis-split{display:grid;grid-template-columns:1fr 1fr;gap:6px;flex:1;}
+.oasis-col{display:flex;flex-direction:column;gap:4px;min-height:0;}
+.oasis-col-hdr{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;justify-content:space-between;padding:4px 8px;background:var(--bg4);border-radius:6px;color:var(--t3);}
+.oasis-col-hdr .cnt{font-size:10px;padding:1px 6px;background:var(--bg3);border-radius:99px;color:var(--t3);font-weight:500;}
+.dtype-list{height:285px;overflow-y:auto;border:1px solid var(--b1);border-radius:8px;background:var(--bg);}
+.dtype-list::-webkit-scrollbar{width:3px;}.dtype-list::-webkit-scrollbar-track{background:transparent;}.dtype-list::-webkit-scrollbar-thumb{background:var(--b2);border-radius:99px;}
+.dtype-item{padding:5px 8px;font-size:11px;color:var(--t2);cursor:pointer;border-bottom:1px solid rgba(255,255,255,.03);display:flex;align-items:center;gap:6px;transition:all .1s;line-height:1.35;}
+.dtype-item:hover{background:var(--bg3);color:var(--t1);}
+.dtype-item.selected{background:rgba(251,191,36,.08);color:var(--amber);font-weight:500;}
+.dtype-item.highlighted{background:rgba(248,113,113,.07);color:var(--red);}
+.dtype-code{font-size:9px;font-weight:700;color:var(--t4);min-width:38px;font-family:monospace;}
+.dtype-item.selected .dtype-code{color:rgba(251,191,36,.55);}
+.subcat-list{height:285px;overflow-y:auto;border:1px solid var(--b1);border-radius:8px;background:var(--bg);}
+.subcat-list::-webkit-scrollbar{width:3px;}.subcat-list::-webkit-scrollbar-track{background:transparent;}.subcat-list::-webkit-scrollbar-thumb{background:var(--b2);border-radius:99px;}
+.subcat-placeholder{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--t4);font-size:11px;text-align:center;padding:16px;}
+.subcat-item{padding:5px 8px;font-size:11px;color:var(--t2);cursor:pointer;border-bottom:1px solid rgba(255,255,255,.03);display:flex;align-items:center;gap:6px;transition:all .1s;line-height:1.35;}
+.subcat-item:hover{background:var(--bg3);color:var(--t1);}
+.subcat-item.selected{background:rgba(79,142,247,.1);color:var(--blue);font-weight:500;}
+.subcat-item.highlighted{background:rgba(251,191,36,.08);color:var(--amber);font-weight:500;}
+.subcat-code{font-size:9px;font-weight:700;color:var(--t4);min-width:44px;font-family:monospace;}
+.subcat-item.selected .subcat-code{color:rgba(79,142,247,.55);}
+.subcat-item.highlighted .subcat-code{color:rgba(251,191,36,.55);}
+.m-selected-box{padding:7px 10px;background:var(--bg3);border-radius:8px;border:1px solid var(--b1);display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.m-sel-lbl{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;}
+.m-sel-val{font-size:11.5px;font-weight:500;color:var(--amber);text-align:right;}
+.stress{padding:8px 10px;background:rgba(248,113,113,.06);border:1px solid rgba(248,113,113,.14);border-radius:8px;font-size:11.5px;color:var(--red);display:none;line-height:1.5;}
+
+/* AI 2-STEP */
+.ai-body{padding:10px 12px;flex:1;display:flex;flex-direction:column;gap:8px;}
+.step-indicator{display:flex;align-items:center;gap:0;margin-bottom:2px;}
+.step-pip{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;padding:4px 12px 4px 10px;border-radius:99px;background:var(--bg4);color:var(--t3);transition:all .3s;border:1px solid var(--b1);}
+.step-pip.active{background:rgba(79,142,247,.12);color:var(--blue);border-color:rgba(79,142,247,.25);}
+.step-pip.done{background:rgba(52,211,153,.1);color:var(--green);border-color:rgba(52,211,153,.2);}
+.step-arrow{font-size:13px;color:var(--t4);margin:0 4px;}
+.step-num{width:18px;height:18px;border-radius:50%;background:currentColor;display:flex;align-items:center;justify-content:center;}
+.step-num span{font-size:9px;font-weight:700;color:var(--bg);}
+
+/* Step 1: 38-group grid */
+.groups-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:4px;background:var(--bg);border:1px solid var(--b1);border-radius:8px;max-height:185px;overflow-y:auto;}
+.groups-grid::-webkit-scrollbar{width:4px;}.groups-grid::-webkit-scrollbar-track{background:transparent;}.groups-grid::-webkit-scrollbar-thumb{background:var(--b2);border-radius:99px;}
+.grp-pill{padding:5px 7px;border-radius:6px;font-size:10px;color:var(--t3);background:var(--bg3);border:1px solid var(--b1);cursor:default;text-align:center;line-height:1.3;transition:all .3s;}
+.grp-pill.scanning{animation:scan .8s ease-in-out infinite alternate;}
+@keyframes scan{from{background:var(--bg3);color:var(--t3);}to{background:var(--bg4);color:var(--t2);}}
+.grp-pill.selected{background:rgba(79,142,247,.15);border-color:rgba(79,142,247,.4);color:var(--blue);font-weight:600;animation:none;}
+.grp-pill.dimmed{opacity:.35;}
+
+/* Step 2: sub-options */
+.sub-options{display:flex;flex-direction:column;gap:4px;padding:4px;background:var(--bg);border:1px solid var(--b1);border-radius:8px;}
+.sub-option{padding:7px 10px;border-radius:6px;font-size:12px;color:var(--t2);background:var(--bg3);border:1px solid var(--b1);transition:all .3s;display:flex;align-items:center;gap:8px;}
+.sub-option.scanning{animation:scan .7s ease-in-out infinite alternate;}
+.sub-option.selected{background:rgba(52,211,153,.12);border-color:rgba(52,211,153,.3);color:var(--green);font-weight:600;animation:none;}
+.sub-option.dimmed{opacity:.35;}
+.sub-option-check{width:16px;height:16px;border-radius:50%;background:rgba(52,211,153,.2);border:1px solid var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;color:var(--green);}
+
+/* confidence + result */
+.conf-wrap{padding:8px 10px;background:var(--bg3);border-radius:8px;border:1px solid var(--b1);}
+.conf-top{display:flex;justify-content:space-between;font-size:11px;color:var(--t2);margin-bottom:5px;}
+.conf-track{height:4px;background:var(--bg4);border-radius:99px;overflow:hidden;}
+.conf-fill{height:100%;border-radius:99px;background:var(--green);transition:width .9s ease;}
+.human-note{display:flex;align-items:flex-start;gap:7px;background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.14);border-radius:7px;padding:8px 10px;font-size:11.5px;color:var(--t2);}
+
+/* field rows */
+.fields-box{padding:8px 10px;background:var(--bg3);border-radius:8px;border:1px solid var(--b1);}
+.fields-hdr{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);margin-bottom:7px;display:flex;align-items:center;justify-content:space-between;}
+.ostat{font-size:10px;padding:2px 7px;border-radius:99px;background:var(--bg4);color:var(--t3);}
+.ostat.ready{background:rgba(52,211,153,.1);color:var(--green);border:1px solid rgba(52,211,153,.2);}
+.frow{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--b1);font-size:12px;}
+.frow:last-child{border-bottom:none;}
+.fk{color:var(--t2);}.fv{font-weight:500;text-align:right;max-width:58%;}.fv.filled{color:var(--green);}
+
+/* controls */
+.ctrls{display:flex;gap:10px;margin-top:14px;}
+.btn-p{flex:1;padding:10px;border-radius:8px;background:var(--scale);color:#fff;font-size:13px;font-weight:600;border:none;cursor:pointer;transition:opacity .15s;}
+.btn-p:hover{opacity:.88;}.btn-p:disabled{opacity:.3;cursor:not-allowed;}
+.btn-g{padding:10px 18px;border-radius:8px;background:var(--bg3);color:var(--t2);font-size:13px;border:1px solid var(--b2);cursor:pointer;transition:all .15s;}
+.btn-g:hover{color:var(--t1);}.btn-g:disabled{opacity:.3;cursor:not-allowed;}
+
+.dots span{animation:blink 1.4s infinite;}.dots span:nth-child(2){animation-delay:.2s;}.dots span:nth-child(3){animation-delay:.4s;}
+@keyframes blink{0%,80%,100%{opacity:0}40%{opacity:1}}
+
+.lang-row{display:flex;gap:5px;flex-wrap:wrap;margin-top:14px;align-items:center;}
+.lpill{font-size:10px;padding:3px 9px;border-radius:99px;background:var(--bg3);border:1px solid var(--b1);color:var(--t2);}
+.lpill.live{background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.2);color:var(--green);}
+.lpill.next{background:rgba(251,191,36,.08);border-color:rgba(251,191,36,.18);color:var(--amber);}
+
+/* EVAL + ARCH tabs */
+.chart-card{background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r);padding:18px;margin-bottom:16px;}
+.kmetrics{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:18px;}
+.km{background:var(--bg2);border:1px solid var(--b1);border-radius:8px;padding:13px;}
+.km-val{font-size:24px;font-weight:600;line-height:1.1;margin-bottom:3px;}
+.km-lbl{font-size:11px;color:var(--t2);}
+.ver-btns{display:flex;gap:7px;margin-bottom:10px;}
+.vbtn{padding:5px 12px;font-size:12px;font-weight:500;border-radius:99px;cursor:pointer;background:var(--bg3);border:1px solid var(--b2);color:var(--t2);transition:all .15s;}
+.vbtn.active{background:rgba(79,142,247,.12);border-color:rgba(79,142,247,.3);color:var(--blue);}
+.insight-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
+.icard{background:var(--bg2);border:1px solid var(--b1);border-radius:8px;padding:13px;}
+.legend-row{display:flex;gap:11px;flex-wrap:wrap;font-size:11px;color:var(--t2);margin-top:10px;}
+.li{display:flex;align-items:center;gap:4px;}.ls{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
+.arch-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:18px;}
+.acard{background:var(--bg2);border:1px solid var(--b1);border-radius:8px;padding:13px;}
+.acard-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);margin-bottom:7px;}
+.flow-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;margin-bottom:18px;}
+.fs{background:var(--bg2);border:1px solid var(--b1);border-radius:8px;padding:13px;text-align:center;position:relative;}
+.fs:not(:last-child)::after{content:'→';position:absolute;right:-9px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:13px;z-index:1;}
+.tl-item{display:flex;gap:11px;padding:9px 0;border-bottom:1px solid var(--b1);}
+.tl-item:last-child{border-bottom:none;}.tdot{width:8px;height:8px;border-radius:50%;background:var(--blue);flex-shrink:0;margin-top:4px;}
+footer{text-align:center;padding:24px;border-top:1px solid var(--b1);color:var(--t3);font-size:11px;margin-top:28px;}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-l">
+    <div class="logo" style="background:#003781;font-size:10px;font-weight:800;letter-spacing:-.5px;">ALZ</div>
+    <span class="nav-title">Allianz Roadside Assistance Copilot</span>
+    <div class="vdiv"></div>
+    <span class="nav-sub">Damage Classification · Spain</span>
+  </div>
+  <div class="live-badge"><span class="ldot"></span>Live in production</div>
+</nav>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('live')">Live demo</button>
+  <button class="tab" onclick="switchTab('eval')">Eval story</button>
+  <button class="tab" onclick="switchTab('arch')">Architecture & impact</button>
+</div>
+
+<main>
+<!-- ══════════════════ LIVE ══════════════════ -->
+<div id="panel-live" class="panel active">
+
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+    <div class="sc-bar" style="margin-bottom:0;">
+      <span style="font-size:10px;color:var(--t3);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-right:4px;">Scenario</span>
+      <button class="sc-btn active" id="sc0" onclick="setScenario(0)">🔩 Object in tyre</button>
+      <button class="sc-btn" id="sc1" onclick="setScenario(1)">🔋 Dead battery</button>
+      <button class="sc-btn" id="sc2" onclick="setScenario(2)">🌡 Engine overheating</button>
+      <button class="sc-btn" id="sc3" onclick="setScenario(3)">💨 Tyre burst</button>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <button class="btn-p" id="sbtn" onclick="startCall()" style="padding:7px 20px;font-size:13px;">▶  Start call</button>
+      <button class="btn-g" id="rbtn" onclick="resetCall()" disabled style="padding:7px 16px;font-size:13px;">↺  Reset</button>
+    </div>
+  </div>
+
+  <!-- call status bar -->
+  <div class="callbar">
+    <div class="callbar-l">
+      <span id="cdot" style="width:8px;height:8px;border-radius:50%;background:var(--t3);display:inline-block;flex-shrink:0;transition:background .3s;"></span>
+      <span id="cstatus">Select a scenario and press Start call</span>
+    </div>
+    <span id="ctimer" class="timer">0:00</span>
+  </div>
+
+  <!-- sim view tabs -->
+  <div class="sim-tabs">
+    <button class="sim-tab active" id="stab-manual" onclick="switchSimTab('manual')">Manual Workflow</button>
+    <button class="sim-tab" id="stab-ai" onclick="switchSimTab('ai')">RSA Copilot Workflow</button>
+  </div>
+
+  <!-- ── WITHOUT AI ── -->
+  <div id="sim-manual">
+    <div class="transcript-wrap" style="margin-bottom:12px;">
+      <div class="transcript-hdr">
+        <span class="pane-lbl">Live transcript</span>
+        <span style="font-size:11px;color:var(--t3);" id="lang-m">ES · Spanish</span>
+      </div>
+      <div class="transcript-body" id="tbox-m"><span style="color:var(--t3);">Waiting for call to start…</span></div>
+    </div>
+
+    <div style="background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r);overflow:hidden;">
+      <div style="padding:10px 14px;border-bottom:1px solid var(--b1);display:flex;align-items:center;justify-content:space-between;">
+        <span style="font-size:12px;font-weight:600;color:var(--t1);">Oasis — Damage Classification</span>
+        <span style="font-size:11px;color:var(--t3);">Select damage type → subcategory ID</span>
+      </div>
+      <div class="manual-body" style="padding:12px 14px;">
+        <div class="oasis-split">
+          <div class="oasis-col">
+            <div class="oasis-col-hdr">Damage type <span class="cnt" id="dtype-cnt">17</span></div>
+            <div class="dtype-list" id="dtype-list"></div>
+          </div>
+          <div class="oasis-col">
+            <div class="oasis-col-hdr">Subcategory ID <span class="cnt" id="subcat-cnt">—</span></div>
+            <div class="subcat-list" id="subcat-list">
+              <div class="subcat-placeholder">
+                <span style="font-size:22px;">←</span>
+                <span>Select a damage type<br>to see subcategory IDs</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="stress" id="stress" style="margin-top:10px;">Customer is waiting — select the damage ID to proceed with dispatch.</div>
+        <div class="m-selected-box" style="margin-top:10px;">
+          <span class="m-sel-lbl">Selected damage ID</span>
+          <span class="m-sel-val" id="mval">—</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── AI COPILOT ── -->
+  <div id="sim-ai" style="display:none;">
+    <div class="transcript-wrap" style="margin-bottom:12px;">
+      <div class="transcript-hdr">
+        <span class="pane-lbl">Live transcript</span>
+        <span style="font-size:11px;color:var(--t3);">ES · Spanish</span>
+      </div>
+      <div class="transcript-body" id="tbox-a"><span style="color:var(--t3);">Waiting for call to start…</span></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+
+      <!-- Classification panel -->
+      <div style="background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r);overflow:hidden;">
+        <div style="padding:10px 14px;border-bottom:1px solid var(--b1);display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:12px;font-weight:600;color:var(--t1);">Damage Classification</span>
+          <span style="font-size:10px;color:var(--t3);font-family:monospace;">GPT-4.1 mini</span>
+        </div>
+        <div class="ai-body" style="padding:12px 14px;">
+          <div class="step-indicator">
+            <div class="step-pip" id="pip1">
+              <div class="step-num"><span>1</span></div>
+              <span>38 subcategory groups</span>
+            </div>
+            <span class="step-arrow">→</span>
+            <div class="step-pip" id="pip2">
+              <div class="step-num"><span>2</span></div>
+              <span>68 specific options</span>
+            </div>
+          </div>
+
+          <div id="step1-wrap">
+            <div style="font-size:10px;color:var(--t3);margin-bottom:5px;display:flex;align-items:center;justify-content:space-between;">
+              <span style="text-transform:uppercase;letter-spacing:.05em;">Step 1 — subcategory group</span>
+              <span id="step1-status" style="color:var(--t3);">—</span>
+            </div>
+            <div class="groups-grid" id="groups-grid"></div>
+          </div>
+
+          <div id="step2-wrap" style="opacity:.3;transition:opacity .4s;">
+            <div style="font-size:10px;color:var(--t3);margin-bottom:5px;display:flex;align-items:center;justify-content:space-between;">
+              <span style="text-transform:uppercase;letter-spacing:.05em;">Step 2 — specific option</span>
+              <span id="step2-status" style="color:var(--t3);">—</span>
+            </div>
+            <div class="sub-options" id="sub-options"></div>
+          </div>
+
+          <div id="ai-result" style="display:none;">
+            <div class="conf-wrap">
+              <div class="conf-top"><span id="result-label" style="font-size:12px;font-weight:600;color:var(--green);"></span><span id="conf-pct" style="color:var(--green);font-weight:700;font-size:13px;"></span></div>
+              <div class="conf-track"><div class="conf-fill" id="cbar" style="width:0%"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reasoning + extracted fields -->
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div style="background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r);overflow:hidden;flex:1;">
+          <div style="padding:10px 14px;border-bottom:1px solid var(--b1);">
+            <span style="font-size:12px;font-weight:600;color:var(--t1);">Reasoning</span>
+          </div>
+          <div style="padding:12px 14px;">
+            <div id="reasoning-text" style="font-size:12.5px;color:var(--t2);line-height:1.8;min-height:80px;">
+              <span style="color:var(--t4);">Awaiting transcript…</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="fields-box" style="flex:1;">
+          <div class="fields-hdr">Extracted fields <span class="ostat" id="ostat">Pending</span></div>
+          <div class="frow"><span class="fk">Damage category</span><span class="fv" id="f-cat">—</span></div>
+          <div class="frow"><span class="fk">Subcategory ID</span><span class="fv" id="f-sub">—</span></div>
+          <div class="frow"><span class="fk">Vehicle</span><span class="fv" id="f-veh">—</span></div>
+          <div class="frow"><span class="fk">Location</span><span class="fv" id="f-loc">—</span></div>
+          <div class="frow"><span class="fk">Case event</span><span class="fv" id="f-evt">—</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="lang-row" style="margin-top:16px;">
+    <span style="font-size:10px;color:var(--t3);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-right:4px;">Languages</span>
+    <span class="lpill live">🇪🇸 Spanish</span>
+    <span class="lpill next">🇫🇷 French (next)</span>
+    <span class="lpill">🇩🇪 German</span><span class="lpill">🇮🇹 Italian</span>
+    <span class="lpill">🇵🇱 Polish</span><span class="lpill">🇳🇱 Dutch</span>
+    <span style="font-size:10px;color:var(--t3);">+7 planned · 13 total</span>
+  </div>
+</div>
+
+<!-- ══════════════════ EVAL ══════════════════ -->
+<div id="panel-eval" class="panel">
+  <div class="chart-card" style="position:relative;overflow:hidden;padding:22px 26px;margin-bottom:18px;">
+    <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--scale),var(--purple),var(--green));"></div>
+    <div style="font-size:19px;font-weight:600;margin-bottom:7px;">The eval story: why 56.8% became 93–94%</div>
+    <div style="font-size:13px;color:var(--t2);line-height:1.7;max-width:680px;">Initial benchmarking showed 56.8% exact match against human selections. Deeper analysis revealed the AI was choosing <em>more specific, operationally correct</em> categories. A third-party reviewer confirmed this. Lesson: evaluating against human baseline alone is insufficient.</div>
+  </div>
+  <div class="kmetrics">
+    <div class="km"><div class="km-val" style="color:var(--amber)">56.8%</div><div class="km-lbl">Initial exact match</div></div>
+    <div class="km"><div class="km-val" style="color:var(--green)">93–94%</div><div class="km-lbl">Adjusted accuracy</div></div>
+    <div class="km"><div class="km-val">850</div><div class="km-lbl">Sessions analysed</div></div>
+    <div class="km"><div class="km-val" style="color:var(--blue)">Jan–Apr '26</div><div class="km-lbl">Eval window</div></div>
+  </div>
+  <div class="chart-card">
+    <div style="font-size:13px;font-weight:500;margin-bottom:4px;">Classification breakdown by version</div>
+    <div style="font-size:12px;color:var(--t2);margin-bottom:11px;">Exact match dropping is intentional — the AI is correctly using newly available specific categories.</div>
+    <div class="ver-btns">
+      <button class="vbtn active" id="vb0" onclick="showVer(0)">v1 · 21 categories</button>
+      <button class="vbtn" id="vb1" onclick="showVer(1)">v2 · 28 categories</button>
+      <button class="vbtn" id="vb2" onclick="showVer(2)">v3 · 68 categories</button>
+    </div>
+    <div id="ver-note" style="font-size:12px;color:var(--t2);padding:9px 11px;background:var(--bg3);border-radius:8px;margin-bottom:11px;line-height:1.7;"></div>
+    <div style="position:relative;height:210px;"><canvas id="evalChart" role="img" aria-label="Stacked bar chart of AI classification accuracy breakdown"></canvas></div>
+    <div class="legend-row" id="eval-legend"></div>
+  </div>
+  <div class="insight-grid">
+    <div class="icard"><div style="font-size:18px;margin-bottom:7px;">🎯</div><div style="font-weight:500;margin-bottom:4px;">AI chose more specific categories</div><div style="font-size:12px;color:var(--t2);line-height:1.7;">10.6% of cases: human selected vague "other" — AI picked specific defect (coolant leak, battery discharge, object in tyre).</div></div>
+    <div class="icard"><div style="font-size:18px;margin-bottom:7px;">🚛</div><div style="font-weight:500;margin-bottom:4px;">Wrong technician = 2× labor cost</div><div style="font-size:12px;color:var(--t2);line-height:1.7;">Vague classification → wrong tech dispatched → second visit. Specific category → right tech & parts on first dispatch.</div></div>
+    <div class="icard"><div style="font-size:18px;margin-bottom:7px;">🔍</div><div style="font-weight:500;margin-bottom:4px;">Human baseline is misleading</div><div style="font-size:12px;color:var(--t2);line-height:1.7;">Humans under time pressure default to "other." Comparing AI to a degraded baseline undervalues AI output quality.</div></div>
+    <div class="icard"><div style="font-size:18px;margin-bottom:7px;">📋</div><div style="font-weight:500;margin-bottom:4px;">Case event: 74.8% exact match</div><div style="font-size:12px;color:var(--t2);line-height:1.7;">92% of agents select only "Technical Breakdown." AI correctly identifies flat tyre, flat battery, key issues, accident.</div></div>
+  </div>
+</div>
+
+<!-- ══════════════════ ARCH ══════════════════ -->
+<div id="panel-arch" class="panel">
+  <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:13px;">How it works</div>
+  <div class="flow-steps">
+    <div class="fs"><div style="font-size:20px;margin-bottom:7px;">📞</div><div style="font-size:12px;font-weight:500;margin-bottom:3px;">Live call</div><div style="font-size:11px;color:var(--t2);">Customer in distress</div></div>
+    <div class="fs"><div style="font-size:20px;margin-bottom:7px;">📝</div><div style="font-size:12px;font-weight:500;margin-bottom:3px;">Transcript</div><div style="font-size:11px;color:var(--t2);">Allianz provides real-time</div></div>
+    <div class="fs"><div style="font-size:20px;margin-bottom:7px;">🤖</div><div style="font-size:12px;font-weight:500;margin-bottom:3px;">Classification</div><div style="font-size:11px;color:var(--t2);">GPT-4.1 mini · 2-step</div></div>
+    <div class="fs"><div style="font-size:20px;margin-bottom:7px;">✅</div><div style="font-size:12px;font-weight:500;margin-bottom:3px;">Oasis auto-fill</div><div style="font-size:11px;color:var(--t2);">Agent reviews & accepts</div></div>
+  </div>
+  <div class="arch-grid">
+    <div class="acard"><div class="acard-lbl">Classification strategy</div><div style="font-size:13px;color:var(--t2);line-height:1.8;">Two-step prompt: first pick the <strong style="color:var(--t1);">subcategory group</strong>, then the <strong style="color:var(--t1);">specific option</strong>. Expanded from flat 21 to nested hierarchy of <strong style="color:var(--green);">68 categories</strong> across 38 groups.</div></div>
+    <div class="acard"><div class="acard-lbl">Model selection</div><div style="font-size:13px;color:var(--t2);line-height:1.8;">Switched to <strong style="color:var(--t1);">GPT-4.1 mini</strong> — <strong style="color:var(--green);">~8× reduction in token cost</strong> with 83.5% vs 83.5% total appropriate. Re-evaluated on each new model release.</div></div>
+    <div class="acard"><div class="acard-lbl">Deployment path</div><div style="font-size:13px;color:var(--t2);line-height:1.8;"><strong style="color:var(--t1);">Shadow mode</strong> first — AI runs silently, logged not surfaced. After validation → <strong style="color:var(--green);">live copilot mode</strong>. Currently live in Spain.</div></div>
+    <div class="acard"><div class="acard-lbl">Multi-language</div><div style="font-size:13px;color:var(--t2);line-height:1.8;"><strong style="color:var(--t1);">Spain live</strong>, France in progress. Targeting <strong style="color:var(--green);">13 languages total</strong>. Each market: shadow → production validation cycle.</div></div>
+  </div>
+  <div class="chart-card"><div style="font-size:13px;font-weight:500;margin-bottom:4px;">Token cost: GPT-4.1 vs GPT-4.1 mini</div><div style="font-size:12px;color:var(--t2);margin-bottom:9px;">1.5pp total appropriate delta for 8× cost reduction.</div><div style="position:relative;height:120px;"><canvas id="costChart" role="img" aria-label="Cost comparison bar chart"></canvas></div></div>
+  <div style="background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r);padding:15px 18px;">
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:11px;">Programme milestones</div>
+    <div class="tl-item"><div class="tdot"></div><div><div style="font-size:13px;font-weight:500;margin-bottom:2px;">Shadow mode launch — Spain</div><div style="font-size:12px;color:var(--t2);">AI runs in parallel. Ground truth collected against human selections.</div></div></div>
+    <div class="tl-item"><div class="tdot"></div><div><div style="font-size:13px;font-weight:500;margin-bottom:2px;">v1 eval — 21 categories · 56.8% exact match</div><div style="font-size:12px;color:var(--t2);">Analysis revealed AI was more specific than human baseline.</div></div></div>
+    <div class="tl-item"><div class="tdot"></div><div><div style="font-size:13px;font-weight:500;margin-bottom:2px;">v2 — 28 categories · 86.7% total appropriate</div><div style="font-size:12px;color:var(--t2);">Added Other Electrical, Ignition, Object in tyre and 4 more.</div></div></div>
+    <div class="tl-item"><div class="tdot"></div><div><div style="font-size:13px;font-weight:500;margin-bottom:2px;">v3 — 68 categories · nested 2-level hierarchy</div><div style="font-size:12px;color:var(--t2);">GPT-4.1 mini validated — 8× cost reduction, minimal degradation.</div></div></div>
+    <div class="tl-item"><div class="tdot" style="background:var(--green)"></div><div><div style="font-size:13px;font-weight:500;margin-bottom:2px;color:var(--green);">Live production · Spain · Expanding to 13 languages</div><div style="font-size:12px;color:var(--t2);">France next. Continuous eval loop on every model release.</div></div></div>
+  </div>
+</div>
+</main>
+<footer><strong>Allianz Roadside Assistance Copilot</strong> · Damage Classification · Confidential</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+// ─── OASIS 2-LEVEL TAXONOMY (68 damage types × ~38 subcategory IDs each) ───
+const OASIS = [
+  {code:"TW",label:"Tyre — Puncture",subs:[
+    {id:"TW-001",name:"Puncture front left — nail"},
+    {id:"TW-002",name:"Puncture front right — nail"},
+    {id:"TW-003",name:"Puncture rear left — nail"},
+    {id:"TW-004",name:"Puncture rear right — nail"},
+    {id:"TW-005",name:"Puncture — cause unknown"},
+    {id:"TW-006",name:"Slow puncture (valve failure)"},
+    {id:"TW-007",name:"Multiple punctures"},
+    {id:"TW-008",name:"Puncture — tyre aged / cracked"},
+    {id:"TW-009",name:"Puncture — pothole impact"},
+    {id:"TW-010",name:"Puncture — kerb impact"},
+    {id:"TW-011",name:"Puncture — tyre underinflated"},
+    {id:"TW-012",name:"Puncture — spare deployed"},
+    {id:"TW-013",name:"Puncture — run-flat damaged"},
+    {id:"TW-014",name:"Puncture — bead unseated"},
+    {id:"TW-015",name:"Puncture — tread separation"},
+    {id:"TW-016",name:"Puncture — sidewall bubble"},
+    {id:"TW-017",name:"Puncture — valve stem broken"},
+    {id:"TW-018",name:"Puncture — TPMS fault only"},
+    {id:"TW-019",name:"Puncture — spare tyre flat"},
+    {id:"TW-020",name:"Puncture — no spare available"},
+    {id:"TW-021",name:"Puncture — customer changed tyre"},
+    {id:"TW-022",name:"Puncture — wheel nut sheared"},
+    {id:"TW-023",name:"Puncture — rim cracked"},
+    {id:"TW-024",name:"Puncture — tyre size mismatch"},
+    {id:"TW-025",name:"Puncture — road hazard debris"},
+    {id:"TW-026",name:"Puncture — tyre rotation needed"},
+    {id:"TW-027",name:"Puncture — wheel balance issue"},
+    {id:"TW-028",name:"Puncture — alloy wheel damaged"},
+    {id:"TW-029",name:"Puncture — centre cap missing"},
+    {id:"TW-030",name:"Puncture — tyre noise only"},
+    {id:"TW-031",name:"Puncture — after kerb mount"},
+    {id:"TW-032",name:"Puncture — tyre age over 6yr"},
+    {id:"TW-033",name:"Puncture — tyre brand mismatch"},
+    {id:"TW-034",name:"Puncture — repair refused (legal)"},
+    {id:"TW-035",name:"Puncture — tow required"},
+    {id:"TW-036",name:"Puncture — tyre foam used"},
+    {id:"TW-037",name:"Puncture — off-road vehicle"},
+    {id:"TW-038",name:"Puncture — commercial vehicle"},
+  ]},
+  {code:"TO",label:"Tyre — Object in Tyre",subs:[
+    {id:"TO-001",name:"Object — nail or screw (front)"},
+    {id:"TO-002",name:"Object — nail or screw (rear)"},
+    {id:"TO-003",name:"Object — metal fragment"},
+    {id:"TO-004",name:"Object — glass shard"},
+    {id:"TO-005",name:"Object — road stud"},
+    {id:"TO-006",name:"Object — stone / gravel"},
+    {id:"TO-007",name:"Object — wire fragment"},
+    {id:"TO-008",name:"Object — unknown debris"},
+    {id:"TO-009",name:"Object — embedded, not through"},
+    {id:"TO-010",name:"Object — through-tread failure"},
+    {id:"TO-011",name:"Object — construction site debris"},
+    {id:"TO-012",name:"Object — truck tyre fragment"},
+    {id:"TO-013",name:"Object — from road works"},
+    {id:"TO-014",name:"Object — from accident scene"},
+    {id:"TO-015",name:"Object — bolt / fastener"},
+    {id:"TO-016",name:"Object — multiple objects"},
+    {id:"TO-017",name:"Object — sidewall penetration"},
+    {id:"TO-018",name:"Object — customer removed object"},
+    {id:"TO-019",name:"Object — tyre repaired roadside"},
+    {id:"TO-020",name:"Object — tow requested"},
+    {id:"TO-021",name:"Object — run-flat compromised"},
+    {id:"TO-022",name:"Object — puncture sealant used"},
+    {id:"TO-023",name:"Object — spare deployed"},
+    {id:"TO-024",name:"Object — tyre irreparable"},
+    {id:"TO-025",name:"Object — tyre repairable"},
+    {id:"TO-026",name:"Object — wheel damaged too"},
+    {id:"TO-027",name:"Object — motorway debris"},
+    {id:"TO-028",name:"Object — lorry trailer debris"},
+    {id:"TO-029",name:"Object — highway works"},
+    {id:"TO-030",name:"Object — customer unsure source"},
+    {id:"TO-031",name:"Object — tyre < 1yr old"},
+    {id:"TO-032",name:"Object — tyre > 5yr old"},
+    {id:"TO-033",name:"Object — all-season tyre"},
+    {id:"TO-034",name:"Object — winter tyre"},
+    {id:"TO-035",name:"Object — summer tyre"},
+    {id:"TO-036",name:"Object — premium brand"},
+    {id:"TO-037",name:"Object — budget brand"},
+    {id:"TO-038",name:"Object — tyre warranty claim"},
+  ]},
+  {code:"TB",label:"Tyre — Burst / Blowout",subs:[
+    {id:"TB-001",name:"Burst — front left, high speed"},
+    {id:"TB-002",name:"Burst — front right, high speed"},
+    {id:"TB-003",name:"Burst — rear left"},
+    {id:"TB-004",name:"Burst — rear right"},
+    {id:"TB-005",name:"Burst — cause unknown"},
+    {id:"TB-006",name:"Burst — overinflation"},
+    {id:"TB-007",name:"Burst — underinflation (long run)"},
+    {id:"TB-008",name:"Burst — tread separation"},
+    {id:"TB-009",name:"Burst — sidewall crack"},
+    {id:"TB-010",name:"Burst — aged tyre failure"},
+    {id:"TB-011",name:"Burst — after pothole impact"},
+    {id:"TB-012",name:"Burst — after kerb strike"},
+    {id:"TB-013",name:"Burst — vehicle off-road"},
+    {id:"TB-014",name:"Burst — motorway incident"},
+    {id:"TB-015",name:"Burst — vehicle damaged"},
+    {id:"TB-016",name:"Burst — multiple tyres"},
+    {id:"TB-017",name:"Burst — spare unavailable"},
+    {id:"TB-018",name:"Burst — spare deployed"},
+    {id:"TB-019",name:"Burst — run-flat failure"},
+    {id:"TB-020",name:"Burst — puncture sealant void"},
+    {id:"TB-021",name:"Burst — wheel rim bent"},
+    {id:"TB-022",name:"Burst — wheel rim cracked"},
+    {id:"TB-023",name:"Burst — tow required"},
+    {id:"TB-024",name:"Burst — tyre size issue"},
+    {id:"TB-025",name:"Burst — load rating exceeded"},
+    {id:"TB-026",name:"Burst — speed rating exceeded"},
+    {id:"TB-027",name:"Burst — under 20,000 km"},
+    {id:"TB-028",name:"Burst — over 50,000 km"},
+    {id:"TB-029",name:"Burst — tyre recall affected"},
+    {id:"TB-030",name:"Burst — safety hazard on road"},
+    {id:"TB-031",name:"Burst — police attendance"},
+    {id:"TB-032",name:"Burst — accident resultant"},
+    {id:"TB-033",name:"Burst — EV specific"},
+    {id:"TB-034",name:"Burst — SUV / 4×4"},
+    {id:"TB-035",name:"Burst — commercial vehicle"},
+    {id:"TB-036",name:"Burst — classic / vintage"},
+    {id:"TB-037",name:"Burst — tow hitch load"},
+    {id:"TB-038",name:"Burst — spare also burst"},
+  ]},
+  {code:"BD",label:"Battery — Discharged",subs:[
+    {id:"BD-001",name:"Discharged — lights left on"},
+    {id:"BD-002",name:"Discharged — radio / aux left on"},
+    {id:"BD-003",name:"Discharged — door open (dome)"},
+    {id:"BD-004",name:"Discharged — cause unknown"},
+    {id:"BD-005",name:"Discharged — EV traction battery"},
+    {id:"BD-006",name:"Discharged — EV 12V battery"},
+    {id:"BD-007",name:"Discharged — hybrid 12V"},
+    {id:"BD-008",name:"Discharged — parasitic drain"},
+    {id:"BD-009",name:"Discharged — alarm drain"},
+    {id:"BD-010",name:"Discharged — charger fault"},
+    {id:"BD-011",name:"Discharged — cold weather"},
+    {id:"BD-012",name:"Discharged — short journey use"},
+    {id:"BD-013",name:"Discharged — vehicle stored"},
+    {id:"BD-014",name:"Discharged — after service"},
+    {id:"BD-015",name:"Discharged — after accident"},
+    {id:"BD-016",name:"Discharged — jump start failed"},
+    {id:"BD-017",name:"Discharged — jump start success"},
+    {id:"BD-018",name:"Discharged — new battery needed"},
+    {id:"BD-019",name:"Discharged — battery under 1yr"},
+    {id:"BD-020",name:"Discharged — battery over 5yr"},
+    {id:"BD-021",name:"Discharged — fleet vehicle"},
+    {id:"BD-022",name:"Discharged — rental vehicle"},
+    {id:"BD-023",name:"Discharged — tow required"},
+    {id:"BD-024",name:"Discharged — multi-recurrence"},
+    {id:"BD-025",name:"Discharged — customer recharged"},
+    {id:"BD-026",name:"Discharged — boost pack used"},
+    {id:"BD-027",name:"Discharged — recovery attended"},
+    {id:"BD-028",name:"Discharged — workshop referral"},
+    {id:"BD-029",name:"Discharged — warranty claim"},
+    {id:"BD-030",name:"Discharged — start-stop battery"},
+    {id:"BD-031",name:"Discharged — AGM battery"},
+    {id:"BD-032",name:"Discharged — EFB battery"},
+    {id:"BD-033",name:"Discharged — lead-acid battery"},
+    {id:"BD-034",name:"Discharged — lithium auxiliary"},
+    {id:"BD-035",name:"Discharged — no warning light"},
+    {id:"BD-036",name:"Discharged — warning light on"},
+    {id:"BD-037",name:"Discharged — battery tested ok"},
+    {id:"BD-038",name:"Discharged — battery failed test"},
+  ]},
+  {code:"BF",label:"Battery — Failure (U/S)",subs:[
+    {id:"BF-001",name:"Failure — end of life"},
+    {id:"BF-002",name:"Failure — cell dead"},
+    {id:"BF-003",name:"Failure — swollen / bulging"},
+    {id:"BF-004",name:"Failure — terminal broken"},
+    {id:"BF-005",name:"Failure — terminal corroded"},
+    {id:"BF-006",name:"Failure — terminal loose"},
+    {id:"BF-007",name:"Failure — case cracked"},
+    {id:"BF-008",name:"Failure — acid leak"},
+    {id:"BF-009",name:"Failure — internal short"},
+    {id:"BF-010",name:"Failure — won't hold charge"},
+    {id:"BF-011",name:"Failure — HV battery (EV)"},
+    {id:"BF-012",name:"Failure — BMS fault"},
+    {id:"BF-013",name:"Failure — overcharging damage"},
+    {id:"BF-014",name:"Failure — thermal event (EV)"},
+    {id:"BF-015",name:"Failure — water ingress"},
+    {id:"BF-016",name:"Failure — vibration damage"},
+    {id:"BF-017",name:"Failure — physical impact"},
+    {id:"BF-018",name:"Failure — after fire"},
+    {id:"BF-019",name:"Failure — replacement required"},
+    {id:"BF-020",name:"Failure — warranty (< 2yr)"},
+    {id:"BF-021",name:"Failure — out of warranty"},
+    {id:"BF-022",name:"Failure — non-OEM battery"},
+    {id:"BF-023",name:"Failure — incorrect spec fitted"},
+    {id:"BF-024",name:"Failure — rapid self-discharge"},
+    {id:"BF-025",name:"Failure — no CCA remaining"},
+    {id:"BF-026",name:"Failure — alternator overcharge"},
+    {id:"BF-027",name:"Failure — tow to dealer"},
+    {id:"BF-028",name:"Failure — roadside replaced"},
+    {id:"BF-029",name:"Failure — not accessible roadside"},
+    {id:"BF-030",name:"Failure — battery light on"},
+    {id:"BF-031",name:"Failure — multiple warning lights"},
+    {id:"BF-032",name:"Failure — fail safe mode"},
+    {id:"BF-033",name:"Failure — engine warning too"},
+    {id:"BF-034",name:"Failure — charge system fault"},
+    {id:"BF-035",name:"Failure — test confirms faulty"},
+    {id:"BF-036",name:"Failure — customer aware issue"},
+    {id:"BF-037",name:"Failure — temp issue (cold)"},
+    {id:"BF-038",name:"Failure — fleet management"},
+  ]},
+  {code:"EC",label:"Engine — Coolant / Overheating",subs:[
+    {id:"EC-001",name:"Coolant — lack of coolant"},
+    {id:"EC-002",name:"Coolant — leak (water hose)"},
+    {id:"EC-003",name:"Coolant — leak (radiator)"},
+    {id:"EC-004",name:"Coolant — leak (head gasket)"},
+    {id:"EC-005",name:"Coolant — leak (heater matrix)"},
+    {id:"EC-006",name:"Coolant — leak (intercooler)"},
+    {id:"EC-007",name:"Coolant — water pump failure"},
+    {id:"EC-008",name:"Coolant — thermostat stuck open"},
+    {id:"EC-009",name:"Coolant — thermostat stuck closed"},
+    {id:"EC-010",name:"Coolant — radiator fan failure"},
+    {id:"EC-011",name:"Coolant — reservoir cap failure"},
+    {id:"EC-012",name:"Coolant — overflow pipe blocked"},
+    {id:"EC-013",name:"Coolant — mixed with oil"},
+    {id:"EC-014",name:"Coolant — radiator blocked"},
+    {id:"EC-015",name:"Overheating — cause unknown"},
+    {id:"EC-016",name:"Overheating — temp gauge red"},
+    {id:"EC-017",name:"Overheating — steam from bonnet"},
+    {id:"EC-018",name:"Overheating — engine shutdown"},
+    {id:"EC-019",name:"Overheating — limp mode active"},
+    {id:"EC-020",name:"Overheating — warning light on"},
+    {id:"EC-021",name:"Overheating — after long drive"},
+    {id:"EC-022",name:"Overheating — hot weather event"},
+    {id:"EC-023",name:"Overheating — stop-start traffic"},
+    {id:"EC-024",name:"Overheating — tow load related"},
+    {id:"EC-025",name:"Overheating — after repair"},
+    {id:"EC-026",name:"Overheating — customer topped up"},
+    {id:"EC-027",name:"Overheating — wait & cool only"},
+    {id:"EC-028",name:"Overheating — tow required"},
+    {id:"EC-029",name:"Overheating — engine damage risk"},
+    {id:"EC-030",name:"Overheating — engine seized"},
+    {id:"EC-031",name:"Coolant — EV coolant loop"},
+    {id:"EC-032",name:"Coolant — battery cooling leak (EV)"},
+    {id:"EC-033",name:"Coolant — wrong fluid added"},
+    {id:"EC-034",name:"Coolant — flush required"},
+    {id:"EC-035",name:"Coolant — air lock in system"},
+    {id:"EC-036",name:"Coolant — reservoir cracked"},
+    {id:"EC-037",name:"Coolant — dealership referral"},
+    {id:"EC-038",name:"Coolant — warranty repair"},
+  ]},
+  {code:"EF",label:"Engine — Fuel System",subs:[
+    {id:"EF-001",name:"Fuel — out of fuel (petrol)"},
+    {id:"EF-002",name:"Fuel — out of fuel (diesel)"},
+    {id:"EF-003",name:"Fuel — out of fuel (LPG)"},
+    {id:"EF-004",name:"Fuel — wrong fuel (petrol in diesel)"},
+    {id:"EF-005",name:"Fuel — wrong fuel (diesel in petrol)"},
+    {id:"EF-006",name:"Fuel — pump failure (in-tank)"},
+    {id:"EF-007",name:"Fuel — pump failure (external)"},
+    {id:"EF-008",name:"Fuel — injector fault"},
+    {id:"EF-009",name:"Fuel — rail pressure fault"},
+    {id:"EF-010",name:"Fuel — filter blocked"},
+    {id:"EF-011",name:"Fuel — tank leak"},
+    {id:"EF-012",name:"Fuel — cap missing"},
+    {id:"EF-013",name:"Fuel — cap faulty (seal)"},
+    {id:"EF-014",name:"Fuel — AdBlue low / empty"},
+    {id:"EF-015",name:"Fuel — AdBlue system fault"},
+    {id:"EF-016",name:"Fuel — AdBlue contaminated"},
+    {id:"EF-017",name:"Fuel — vapour lock"},
+    {id:"EF-018",name:"Fuel — fuel gauge fault (not empty)"},
+    {id:"EF-019",name:"Fuel — contaminated fuel"},
+    {id:"EF-020",name:"Fuel — delivery to vehicle"},
+    {id:"EF-021",name:"Fuel — EV charging failure"},
+    {id:"EF-022",name:"Fuel — EV charge cable fault"},
+    {id:"EF-023",name:"Fuel — EV battery range zero"},
+    {id:"EF-024",name:"Fuel — hybrid fuel + EV fault"},
+    {id:"EF-025",name:"Fuel — PHEV charging failure"},
+    {id:"EF-026",name:"Fuel — fuel theft (siphoned)"},
+    {id:"EF-027",name:"Fuel — high pressure system"},
+    {id:"EF-028",name:"Fuel — common rail fault"},
+    {id:"EF-029",name:"Fuel — injector return leak"},
+    {id:"EF-030",name:"Fuel — priming required"},
+    {id:"EF-031",name:"Fuel — drain & flush required"},
+    {id:"EF-032",name:"Fuel — sender unit fault"},
+    {id:"EF-033",name:"Fuel — pressure regulator"},
+    {id:"EF-034",name:"Fuel — fuel smell in cabin"},
+    {id:"EF-035",name:"Fuel — breather pipe blocked"},
+    {id:"EF-036",name:"Fuel — carbon canister fault"},
+    {id:"EF-037",name:"Fuel — range extender fault"},
+    {id:"EF-038",name:"Fuel — tow to dealership"},
+  ]},
+  {code:"ES",label:"Engine — Starting / Ignition",subs:[
+    {id:"ES-001",name:"Starting — won't start, cause unknown"},
+    {id:"ES-002",name:"Starting — ignition failure"},
+    {id:"ES-003",name:"Starting — starter motor seized"},
+    {id:"ES-004",name:"Starting — starter motor jammed"},
+    {id:"ES-005",name:"Starting — starter motor worn"},
+    {id:"ES-006",name:"Starting — immobiliser triggered"},
+    {id:"ES-007",name:"Starting — key fob battery dead"},
+    {id:"ES-008",name:"Starting — key fob not pairing"},
+    {id:"ES-009",name:"Starting — transponder fault"},
+    {id:"ES-010",name:"Starting — smart key fault"},
+    {id:"ES-011",name:"Starting — push button fault"},
+    {id:"ES-012",name:"Starting — anti-theft active"},
+    {id:"ES-013",name:"Starting — alarm won't disarm"},
+    {id:"ES-014",name:"Starting — spark plug failure"},
+    {id:"ES-015",name:"Starting — ignition coil failure"},
+    {id:"ES-016",name:"Starting — crank sensor fault"},
+    {id:"ES-017",name:"Starting — cam sensor fault"},
+    {id:"ES-018",name:"Starting — cranks but won't fire"},
+    {id:"ES-019",name:"Starting — no crank at all"},
+    {id:"ES-020",name:"Starting — engine cuts out after start"},
+    {id:"ES-021",name:"Starting — starting in cold weather"},
+    {id:"ES-022",name:"Starting — glow plug fault (diesel)"},
+    {id:"ES-023",name:"Starting — EV won't power on"},
+    {id:"ES-024",name:"Starting — hybrid won't start"},
+    {id:"ES-025",name:"Starting — ECU programming needed"},
+    {id:"ES-026",name:"Starting — key programming needed"},
+    {id:"ES-027",name:"Starting — immobiliser code needed"},
+    {id:"ES-028",name:"Starting — after accident"},
+    {id:"ES-029",name:"Starting — after service / repair"},
+    {id:"ES-030",name:"Starting — after battery change"},
+    {id:"ES-031",name:"Starting — relay failure"},
+    {id:"ES-032",name:"Starting — neutral safety switch"},
+    {id:"ES-033",name:"Starting — clutch switch fault"},
+    {id:"ES-034",name:"Starting — brake switch fault (EV/auto)"},
+    {id:"ES-035",name:"Starting — PCM / ECM fault"},
+    {id:"ES-036",name:"Starting — theft confirmed"},
+    {id:"ES-037",name:"Starting — police referral"},
+    {id:"ES-038",name:"Starting — tow to dealer"},
+  ]},
+  {code:"EG",label:"Engine — General / Warning",subs:[
+    {id:"EG-001",name:"Engine warning — cause unknown"},
+    {id:"EG-002",name:"Engine — misfire, single cylinder"},
+    {id:"EG-003",name:"Engine — misfire, multiple cylinders"},
+    {id:"EG-004",name:"Engine — rough idle"},
+    {id:"EG-005",name:"Engine — knocking / pinking"},
+    {id:"EG-006",name:"Engine — rattling (top end)"},
+    {id:"EG-007",name:"Engine — rattling (bottom end)"},
+    {id:"EG-008",name:"Engine — timing belt failure"},
+    {id:"EG-009",name:"Engine — timing chain stretch"},
+    {id:"EG-010",name:"Engine — turbo seized"},
+    {id:"EG-011",name:"Engine — turbo wastegate"},
+    {id:"EG-012",name:"Engine — EGR valve fault"},
+    {id:"EG-013",name:"Engine — throttle body fault"},
+    {id:"EG-014",name:"Engine — cut out while driving"},
+    {id:"EG-015",name:"Engine — DPF full"},
+    {id:"EG-016",name:"Engine — MAF sensor fault"},
+    {id:"EG-017",name:"Engine — MAP sensor fault"},
+    {id:"EG-018",name:"Engine — oil pressure light"},
+    {id:"EG-019",name:"Engine — oil level low"},
+    {id:"EG-020",name:"Engine — smoke from exhaust"},
+    {id:"EG-021",name:"Engine — loss of power"},
+    {id:"EG-022",name:"Engine — limp home mode"},
+    {id:"EG-023",name:"Engine — burning smell"},
+    {id:"EG-024",name:"Engine — oil leak visible"},
+    {id:"EG-025",name:"Engine — seized (no oil)"},
+    {id:"EG-026",name:"Engine — head gasket failure"},
+    {id:"EG-027",name:"Engine — tow required"},
+    {id:"EG-028",name:"Engine — workshop referral"},
+    {id:"EG-029",name:"Engine — other warning light"},
+    {id:"EG-030",name:"Engine — multiple warning lights"},
+    {id:"EG-031",name:"Engine — read codes required"},
+    {id:"EG-032",name:"Engine — pre-existing fault"},
+    {id:"EG-033",name:"Engine — intermittent issue"},
+    {id:"EG-034",name:"Engine — stalled and won't restart"},
+    {id:"EG-035",name:"Engine — vibration excessive"},
+    {id:"EG-036",name:"Engine — coolant smell"},
+    {id:"EG-037",name:"Engine — fuel smell"},
+    {id:"EG-038",name:"Engine — undiagnosed fault"},
+  ]},
+  {code:"GB",label:"Gearbox / Transmission",subs:[
+    {id:"GB-001",name:"Gearbox — manual failure"},
+    {id:"GB-002",name:"Gearbox — auto failure"},
+    {id:"GB-003",name:"Gearbox — DSG/DCT fault"},
+    {id:"GB-004",name:"Gearbox — CVT fault"},
+    {id:"GB-005",name:"Gearbox — won't select gear"},
+    {id:"GB-006",name:"Gearbox — stuck in gear"},
+    {id:"GB-007",name:"Gearbox — oil leak"},
+    {id:"GB-008",name:"Gearbox — warning light"},
+    {id:"GB-009",name:"Gearbox — judder / shudder"},
+    {id:"GB-010",name:"Gearbox — noise (whining)"},
+    {id:"GB-011",name:"Gearbox — noise (clunking)"},
+    {id:"GB-012",name:"Gearbox — slipping"},
+    {id:"GB-013",name:"Gearbox — overheating"},
+    {id:"GB-014",name:"Gearbox — differential fault"},
+    {id:"GB-015",name:"Gearbox — propshaft failure"},
+    {id:"GB-016",name:"Gearbox — driveshaft (CV joint)"},
+    {id:"GB-017",name:"Gearbox — driveshaft (shaft)"},
+    {id:"GB-018",name:"Gearbox — transfer box (4WD)"},
+    {id:"GB-019",name:"Gearbox — 4WD/AWD fault"},
+    {id:"GB-020",name:"Gearbox — park lock fault"},
+    {id:"GB-021",name:"Gearbox — selector cable"},
+    {id:"GB-022",name:"Gearbox — torque converter"},
+    {id:"GB-023",name:"Gearbox — solenoid fault"},
+    {id:"GB-024",name:"Gearbox — fluid low"},
+    {id:"GB-025",name:"Gearbox — tow required"},
+    {id:"GB-026",name:"Gearbox — clutch fault (auto)"},
+    {id:"GB-027",name:"Gearbox — EV single-speed fault"},
+    {id:"GB-028",name:"Gearbox — hybrid drive fault"},
+    {id:"GB-029",name:"Gearbox — workshop referral"},
+    {id:"GB-030",name:"Gearbox — fluid change needed"},
+    {id:"GB-031",name:"Gearbox — oil cooler leak"},
+    {id:"GB-032",name:"Gearbox — selector blocked"},
+    {id:"GB-033",name:"Gearbox — reverse not engaging"},
+    {id:"GB-034",name:"Gearbox — high gear failure"},
+    {id:"GB-035",name:"Gearbox — low gear failure"},
+    {id:"GB-036",name:"Gearbox — gear count error"},
+    {id:"GB-037",name:"Gearbox — limp mode (2nd gear)"},
+    {id:"GB-038",name:"Gearbox — unit replacement"},
+  ]},
+  {code:"CL",label:"Clutch System",subs:[
+    {id:"CL-001",name:"Clutch — cable broken"},
+    {id:"CL-002",name:"Clutch — cable stretched"},
+    {id:"CL-003",name:"Clutch — pedal spongy"},
+    {id:"CL-004",name:"Clutch — pedal stuck down"},
+    {id:"CL-005",name:"Clutch — pedal to floor"},
+    {id:"CL-006",name:"Clutch — disc worn"},
+    {id:"CL-007",name:"Clutch — slipping"},
+    {id:"CL-008",name:"Clutch — burning smell"},
+    {id:"CL-009",name:"Clutch — judder on take-off"},
+    {id:"CL-010",name:"Clutch — master cylinder"},
+    {id:"CL-011",name:"Clutch — slave cylinder"},
+    {id:"CL-012",name:"Clutch — hydraulic leak"},
+    {id:"CL-013",name:"Clutch — flywheel (DMF)"},
+    {id:"CL-014",name:"Clutch — fork failure"},
+    {id:"CL-015",name:"Clutch — release bearing"},
+    {id:"CL-016",name:"Clutch — pressure plate"},
+    {id:"CL-017",name:"Clutch — doesn't disengage"},
+    {id:"CL-018",name:"Clutch — won't engage"},
+    {id:"CL-019",name:"Clutch — noise only"},
+    {id:"CL-020",name:"Clutch — vibration"},
+    {id:"CL-021",name:"Clutch — after repair"},
+    {id:"CL-022",name:"Clutch — fluid low"},
+    {id:"CL-023",name:"Clutch — fluid contaminated"},
+    {id:"CL-024",name:"Clutch — self-adjusting fault"},
+    {id:"CL-025",name:"Clutch — hill start assist fault"},
+    {id:"CL-026",name:"Clutch — tow required"},
+    {id:"CL-027",name:"Clutch — workshop referral"},
+    {id:"CL-028",name:"Clutch — under warranty"},
+    {id:"CL-029",name:"Clutch — new vehicle (< 5k km)"},
+    {id:"CL-030",name:"Clutch — user abuse suspected"},
+    {id:"CL-031",name:"Clutch — van / commercial"},
+    {id:"CL-032",name:"Clutch — performance vehicle"},
+    {id:"CL-033",name:"Clutch — modified vehicle"},
+    {id:"CL-034",name:"Clutch — sensor fault"},
+    {id:"CL-035",name:"Clutch — ECU fault linked"},
+    {id:"CL-036",name:"Clutch — gearbox fault linked"},
+    {id:"CL-037",name:"Clutch — noise on cold start"},
+    {id:"CL-038",name:"Clutch — kit replacement needed"},
+  ]},
+  {code:"BR",label:"Brakes",subs:[
+    {id:"BR-001",name:"Brakes — pad worn (warning light)"},
+    {id:"BR-002",name:"Brakes — pad worn (grinding)"},
+    {id:"BR-003",name:"Brakes — disc cracked"},
+    {id:"BR-004",name:"Brakes — disc warped"},
+    {id:"BR-005",name:"Brakes — caliper seized (front)"},
+    {id:"BR-006",name:"Brakes — caliper seized (rear)"},
+    {id:"BR-007",name:"Brakes — fluid leak"},
+    {id:"BR-008",name:"Brakes — fluid low"},
+    {id:"BR-009",name:"Brakes — fluid contaminated"},
+    {id:"BR-010",name:"Brakes — pedal to floor"},
+    {id:"BR-011",name:"Brakes — ABS fault"},
+    {id:"BR-012",name:"Brakes — EPB fault"},
+    {id:"BR-013",name:"Brakes — handbrake failure"},
+    {id:"BR-014",name:"Brakes — booster fault"},
+    {id:"BR-015",name:"Brakes — master cylinder"},
+    {id:"BR-016",name:"Brakes — brake line failure"},
+    {id:"BR-017",name:"Brakes — spongy pedal"},
+    {id:"BR-018",name:"Brakes — pulling to one side"},
+    {id:"BR-019",name:"Brakes — noise only (squeal)"},
+    {id:"BR-020",name:"Brakes — noise only (grind)"},
+    {id:"BR-021",name:"Brakes — warning light only"},
+    {id:"BR-022",name:"Brakes — overheating"},
+    {id:"BR-023",name:"Brakes — rear drum failure"},
+    {id:"BR-024",name:"Brakes — EBA fault"},
+    {id:"BR-025",name:"Brakes — ESC linked fault"},
+    {id:"BR-026",name:"Brakes — hill hold fault"},
+    {id:"BR-027",name:"Brakes — tow required"},
+    {id:"BR-028",name:"Brakes — after accident"},
+    {id:"BR-029",name:"Brakes — after service"},
+    {id:"BR-030",name:"Brakes — after wet weather"},
+    {id:"BR-031",name:"Brakes — drum binding"},
+    {id:"BR-032",name:"Brakes — EV regen fault"},
+    {id:"BR-033",name:"Brakes — hybrid regen fault"},
+    {id:"BR-034",name:"Brakes — pad sensor failure"},
+    {id:"BR-035",name:"Brakes — uneven pad wear"},
+    {id:"BR-036",name:"Brakes — vibration under braking"},
+    {id:"BR-037",name:"Brakes — brake dust issue"},
+    {id:"BR-038",name:"Brakes — safety failure"},
+  ]},
+  {code:"ST",label:"Steering & Suspension",subs:[
+    {id:"ST-001",name:"Steering — EPS failure"},
+    {id:"ST-002",name:"Steering — hydraulic PAS failure"},
+    {id:"ST-003",name:"Steering — rack failure"},
+    {id:"ST-004",name:"Steering — column fault"},
+    {id:"ST-005",name:"Steering — column lock"},
+    {id:"ST-006",name:"Steering — vibration (high speed)"},
+    {id:"ST-007",name:"Steering — pulling to one side"},
+    {id:"ST-008",name:"Steering — heavy (loss of assist)"},
+    {id:"ST-009",name:"Steering — warning light"},
+    {id:"ST-010",name:"Steering — tie rod failure"},
+    {id:"ST-011",name:"Steering — track rod end"},
+    {id:"ST-012",name:"Steering — geometry issue"},
+    {id:"ST-013",name:"Suspension — spring broken (front)"},
+    {id:"ST-014",name:"Suspension — spring broken (rear)"},
+    {id:"ST-015",name:"Suspension — shock absorber (front)"},
+    {id:"ST-016",name:"Suspension — shock absorber (rear)"},
+    {id:"ST-017",name:"Suspension — control arm"},
+    {id:"ST-018",name:"Suspension — wishbone failure"},
+    {id:"ST-019",name:"Suspension — wheel bearing (front)"},
+    {id:"ST-020",name:"Suspension — wheel bearing (rear)"},
+    {id:"ST-021",name:"Suspension — anti-roll bar link"},
+    {id:"ST-022",name:"Suspension — subframe damage"},
+    {id:"ST-023",name:"Suspension — air suspension fault"},
+    {id:"ST-024",name:"Suspension — low ride height"},
+    {id:"ST-025",name:"Suspension — compressor fault"},
+    {id:"ST-026",name:"Suspension — pothole damage"},
+    {id:"ST-027",name:"Suspension — kerb strike damage"},
+    {id:"ST-028",name:"Suspension — accident damage"},
+    {id:"ST-029",name:"Suspension — noise (clunk)"},
+    {id:"ST-030",name:"Suspension — noise (squeak)"},
+    {id:"ST-031",name:"Suspension — tow required"},
+    {id:"ST-032",name:"Suspension — adaptive damper fault"},
+    {id:"ST-033",name:"Suspension — drop link broken"},
+    {id:"ST-034",name:"Suspension — bush worn"},
+    {id:"ST-035",name:"Suspension — strut top mount"},
+    {id:"ST-036",name:"Suspension — coilover failure"},
+    {id:"ST-037",name:"Suspension — workshop referral"},
+    {id:"ST-038",name:"Suspension — EV specific"},
+  ]},
+  {code:"EL",label:"Electrical — General",subs:[
+    {id:"EL-001",name:"Electrical — ECU failure"},
+    {id:"EL-002",name:"Electrical — wiring harness"},
+    {id:"EL-003",name:"Electrical — fuse (main)"},
+    {id:"EL-004",name:"Electrical — fuse (auxiliary)"},
+    {id:"EL-005",name:"Electrical — CAN bus fault"},
+    {id:"EL-006",name:"Electrical — instrument cluster"},
+    {id:"EL-007",name:"Electrical — central locking"},
+    {id:"EL-008",name:"Electrical — boot release"},
+    {id:"EL-009",name:"Electrical — window (front)"},
+    {id:"EL-010",name:"Electrical — window (rear)"},
+    {id:"EL-011",name:"Electrical — headlight (main)"},
+    {id:"EL-012",name:"Electrical — headlight (dipped)"},
+    {id:"EL-013",name:"Electrical — tail light"},
+    {id:"EL-014",name:"Electrical — indicator"},
+    {id:"EL-015",name:"Electrical — horn"},
+    {id:"EL-016",name:"Electrical — wipers (inop)"},
+    {id:"EL-017",name:"Electrical — wiper motor"},
+    {id:"EL-018",name:"Electrical — infotainment"},
+    {id:"EL-019",name:"Electrical — USB / sockets"},
+    {id:"EL-020",name:"Electrical — OBD fault stored"},
+    {id:"EL-021",name:"Electrical — multiple warning lights"},
+    {id:"EL-022",name:"Electrical — dashboard failure"},
+    {id:"EL-023",name:"Electrical — body control module"},
+    {id:"EL-024",name:"Electrical — relay failure"},
+    {id:"EL-025",name:"Electrical — earth fault"},
+    {id:"EL-026",name:"Electrical — short circuit"},
+    {id:"EL-027",name:"Electrical — voltage drop"},
+    {id:"EL-028",name:"Electrical — after water damage"},
+    {id:"EL-029",name:"Electrical — after accident"},
+    {id:"EL-030",name:"Electrical — after service"},
+    {id:"EL-031",name:"Electrical — fire risk"},
+    {id:"EL-032",name:"Electrical — burning smell"},
+    {id:"EL-033",name:"Electrical — intermittent"},
+    {id:"EL-034",name:"Electrical — camera system"},
+    {id:"EL-035",name:"Electrical — parking sensor"},
+    {id:"EL-036",name:"Electrical — ADAS fault"},
+    {id:"EL-037",name:"Electrical — charging system"},
+    {id:"EL-038",name:"Electrical — tow to dealer"},
+  ]},
+  {code:"AC",label:"Accident & Collision",subs:[
+    {id:"AC-001",name:"Collision — minor (driveable)"},
+    {id:"AC-002",name:"Collision — major (not driveable)"},
+    {id:"AC-003",name:"Collision — rear-end"},
+    {id:"AC-004",name:"Collision — side impact"},
+    {id:"AC-005",name:"Collision — head-on"},
+    {id:"AC-006",name:"Collision — roundabout"},
+    {id:"AC-007",name:"Collision — parking impact"},
+    {id:"AC-008",name:"Collision — multi-vehicle"},
+    {id:"AC-009",name:"Collision — with fixed object"},
+    {id:"AC-010",name:"Collision — with animal"},
+    {id:"AC-011",name:"Rollover"},
+    {id:"AC-012",name:"Vehicle in ditch"},
+    {id:"AC-013",name:"Vehicle off road"},
+    {id:"AC-014",name:"Vehicle in water"},
+    {id:"AC-015",name:"Vehicle flooded"},
+    {id:"AC-016",name:"Fire — engine bay"},
+    {id:"AC-017",name:"Fire — interior"},
+    {id:"AC-018",name:"Fire — EV battery"},
+    {id:"AC-019",name:"Vandalism — tyre slashing"},
+    {id:"AC-020",name:"Vandalism — general"},
+    {id:"AC-021",name:"Theft attempt — ignition damage"},
+    {id:"AC-022",name:"Theft attempt — catalytic conv"},
+    {id:"AC-023",name:"Theft — vehicle recovered"},
+    {id:"AC-024",name:"Pothole — underbody damage"},
+    {id:"AC-025",name:"Debris — windscreen impact"},
+    {id:"AC-026",name:"Debris — underbody impact"},
+    {id:"AC-027",name:"Debris — fuel tank punctured"},
+    {id:"AC-028",name:"Debris — sump damage"},
+    {id:"AC-029",name:"Police attendance required"},
+    {id:"AC-030",name:"Airbags deployed"},
+    {id:"AC-031",name:"Injury reported"},
+    {id:"AC-032",name:"Hit & run"},
+    {id:"AC-033",name:"Unattended vehicle damage"},
+    {id:"AC-034",name:"Damage from falling object"},
+    {id:"AC-035",name:"Storm / hail damage"},
+    {id:"AC-036",name:"Flood damage"},
+    {id:"AC-037",name:"Earthquake / subsidence"},
+    {id:"AC-038",name:"Accident — scene photos taken"},
+  ]},
+  {code:"LK",label:"Locks, Keys & Access",subs:[
+    {id:"LK-001",name:"Lockout — keys inside vehicle"},
+    {id:"LK-002",name:"Lockout — key broken in lock"},
+    {id:"LK-003",name:"Lockout — key lost"},
+    {id:"LK-004",name:"Lockout — key fob dead"},
+    {id:"LK-005",name:"Lockout — digital key failure"},
+    {id:"LK-006",name:"Lockout — smartphone key"},
+    {id:"LK-007",name:"Lock — driver door failure"},
+    {id:"LK-008",name:"Lock — passenger door failure"},
+    {id:"LK-009",name:"Lock — child lock jammed"},
+    {id:"LK-010",name:"Lock — boot / tailgate failure"},
+    {id:"LK-011",name:"Lock — central locking failure"},
+    {id:"LK-012",name:"Lock — frozen (winter)"},
+    {id:"LK-013",name:"Lock — cylinder worn"},
+    {id:"LK-014",name:"Lock — after accident"},
+    {id:"LK-015",name:"Lock — after vandalism"},
+    {id:"LK-016",name:"Lock — after theft attempt"},
+    {id:"LK-017",name:"Key — duplicate required"},
+    {id:"LK-018",name:"Key — programming required"},
+    {id:"LK-019",name:"Key — transponder fault"},
+    {id:"LK-020",name:"Key — smart key battery"},
+    {id:"LK-021",name:"Key — proximity sensor"},
+    {id:"LK-022",name:"Key — relay attack (theft)"},
+    {id:"LK-023",name:"Key — immobiliser mismatch"},
+    {id:"LK-024",name:"Key — stolen (vehicle secure)"},
+    {id:"LK-025",name:"Key — valet key only"},
+    {id:"LK-026",name:"Key — no spare available"},
+    {id:"LK-027",name:"Key — dealer required"},
+    {id:"LK-028",name:"Lock — door hinge failure"},
+    {id:"LK-029",name:"Lock — sunroof stuck open"},
+    {id:"LK-030",name:"Lock — sunroof stuck closed"},
+    {id:"LK-031",name:"Lock — window glass issue"},
+    {id:"LK-032",name:"Lock — wiring fault"},
+    {id:"LK-033",name:"Lock — multiple doors failed"},
+    {id:"LK-034",name:"Lock — remote arm/disarm fault"},
+    {id:"LK-035",name:"Lock — PCM fault linked"},
+    {id:"LK-036",name:"Lock — alarm interference"},
+    {id:"LK-037",name:"Lock — warranty repair"},
+    {id:"LK-038",name:"Lock — locksmith attended"},
+  ]},
+  {code:"OT",label:"Other / Unknown",subs:[
+    {id:"OT-001",name:"Other — not categorised"},
+    {id:"OT-002",name:"Other — unknown fault"},
+    {id:"OT-003",name:"Other — customer unable to describe"},
+    {id:"OT-004",name:"Other — vehicle age / wear"},
+    {id:"OT-005",name:"Other — intermittent, no code"},
+    {id:"OT-006",name:"Other — HVAC failure"},
+    {id:"OT-007",name:"Other — AC failure"},
+    {id:"OT-008",name:"Other — cabin heat failure"},
+    {id:"OT-009",name:"Other — exhaust leak"},
+    {id:"OT-010",name:"Other — exhaust noise"},
+    {id:"OT-011",name:"Other — catalytic converter"},
+    {id:"OT-012",name:"Other — DPF blocked"},
+    {id:"OT-013",name:"Other — lambda sensor"},
+    {id:"OT-014",name:"Other — towbar fault"},
+    {id:"OT-015",name:"Other — trailer fault"},
+    {id:"OT-016",name:"Other — windscreen chip"},
+    {id:"OT-017",name:"Other — windscreen break"},
+    {id:"OT-018",name:"Other — wiper issue"},
+    {id:"OT-019",name:"Other — mirror fault"},
+    {id:"OT-020",name:"Other — seat fault"},
+    {id:"OT-021",name:"Other — seatbelt fault"},
+    {id:"OT-022",name:"Other — airbag warning"},
+    {id:"OT-023",name:"Other — TPMS warning only"},
+    {id:"OT-024",name:"Other — service overdue light"},
+    {id:"OT-025",name:"Other — fluid top-up needed"},
+    {id:"OT-026",name:"Other — inspection required"},
+    {id:"OT-027",name:"Other — noise — undiagnosed"},
+    {id:"OT-028",name:"Other — smell — undiagnosed"},
+    {id:"OT-029",name:"Other — vibration — undiagnosed"},
+    {id:"OT-030",name:"Other — vehicle won't move"},
+    {id:"OT-031",name:"Other — recurring fault"},
+    {id:"OT-032",name:"Other — previous repair failed"},
+    {id:"OT-033",name:"Other — multi-system fault"},
+    {id:"OT-034",name:"Other — EV specific unknown"},
+    {id:"OT-035",name:"Other — hybrid specific unknown"},
+    {id:"OT-036",name:"Other — 4WD specific"},
+    {id:"OT-037",name:"Other — commercial vehicle"},
+    {id:"OT-038",name:"Other — awaiting diagnosis"},
+  ]},
+];
+
+// AI HIERARCHY — 38 subcategory groups × 68 total options
+const AI_GROUPS = [
+  {name:"Tyre — puncture",        options:["Puncture — front","Puncture — rear"]},
+  {name:"Tyre — object in tyre",  options:["Object in tyre (nail/screw)","Object in tyre (metal/glass)"]},
+  {name:"Tyre — burst/blowout",   options:["Tyre burst/blowout","Run-flat tyre failure"]},
+  {name:"Tyre — wheel damage",    options:["Rim / wheel damage"]},
+  {name:"Battery — discharged",   options:["Battery discharged (lights on)","Battery discharged (unknown)"]},
+  {name:"Battery — failure",      options:["Battery U/S (end of life)","Battery cell / terminal fault"]},
+  {name:"Battery — EV/charging",  options:["Alternator fault","EV charging failure"]},
+  {name:"Engine — coolant leak",  options:["Coolant lack / hose leak","Radiator / head gasket leak"]},
+  {name:"Engine — overheating",   options:["Overheating (cause unknown)","Radiator fan / water pump"]},
+  {name:"Engine — oil",           options:["Low oil / oil leak","Oil pressure fault"]},
+  {name:"Engine — fuel",          options:["Out of fuel","Wrong fuel added"]},
+  {name:"Engine — fuel system",   options:["Fuel pump / injector / filter"]},
+  {name:"Engine — AdBlue",        options:["AdBlue low/empty","AdBlue system fault"]},
+  {name:"Engine — ignition",      options:["Engine won't start","Ignition / starter motor"]},
+  {name:"Engine — immobiliser",   options:["Immobiliser / anti-theft","Key fob / transponder fault"]},
+  {name:"Engine — sensors",       options:["Crank / cam / MAF sensor fault"]},
+  {name:"Engine — misfire/DPF",   options:["Engine misfire","EGR / DPF / turbo fault"]},
+  {name:"Engine — general",       options:["Engine warning light","Engine cut out (driving)"]},
+  {name:"Gearbox — manual",       options:["Manual gearbox failure","Gear stuck / won't select"]},
+  {name:"Gearbox — auto/CVT",     options:["Auto / DSG / CVT fault"]},
+  {name:"Drivetrain",             options:["Driveshaft / CV joint","Differential / propshaft"]},
+  {name:"Clutch",                 options:["Clutch cable / pedal","Clutch disc / hydraulic"]},
+  {name:"Brakes — pad/disc",      options:["Brake pad worn","Brake disc / caliper failure"]},
+  {name:"Brakes — fluid/line",    options:["Brake fluid / line failure"]},
+  {name:"Brakes — electronic",    options:["ABS fault","EPB / brake warning light"]},
+  {name:"Steering — power",       options:["EPS / PAS / rack failure"]},
+  {name:"Steering — geometry",    options:["Tie rod / track rod failure"]},
+  {name:"Suspension",             options:["Spring / shock absorber failure","Wheel bearing failure"]},
+  {name:"Electrical — ECU/CAN",   options:["ECU / CAN bus fault","Wiring harness fault"]},
+  {name:"Electrical — body",      options:["Central locking / windows","Instrument cluster fault"]},
+  {name:"Electrical — lighting",  options:["Light / indicator failure"]},
+  {name:"Exhaust system",         options:["Exhaust leak","Catalytic converter / lambda"]},
+  {name:"Accident — driveable",   options:["Minor collision (driveable)","Pothole / debris damage"]},
+  {name:"Accident — immobile",    options:["Major collision (immobile)","Rollover / off-road"]},
+  {name:"Fire / theft / vandalism",options:["Fire damage / vandalism","Anti-theft / lockout"]},
+  {name:"Locks & keys",           options:["Lockout (keys inside)","Key broken / lost"]},
+  {name:"Windscreen / glass",     options:["Windscreen chip or crack","Windscreen full break"]},
+  {name:"Other / unknown",        options:["Other — undiagnosed","Unknown / intermittent"]},
+];
+
+// ─── SCENARIOS ─────────────────────────────────────────────────────────────
+const SCENARIOS = [
+  {
+    groupName:"Tyre — object in tyre", option:"Object in tyre (nail/screw)",
+    dtypeCode:"TO", subcatId:"TO-001",
+    lines:[
+      {d:0,    s:'Agent',    t:"Allianz roadside assistance, how can I help you today?"},
+      {d:1800, s:'Customer', t:"Hi — I'm stuck on the A2 motorway. Flat tyre, I can't move at all."},
+      {d:4200, s:'Agent',    t:"I'm sorry to hear that. Can you tell me the make and model of your vehicle?"},
+      {d:6500, s:'Customer', t:"Volkswagen Golf, 2021. I hit something on the road — I think there's a nail or screw stuck right through the tyre."},
+      {d:9500, s:'Agent',    t:"Understood. And your precise location?"},
+      {d:11400,s:'Customer', t:"Near exit 14 on the A2, just before Madrid."},
+    ],
+    hl:["nail or screw stuck right through the tyre"],
+    category:"Tyre — Object in Tyre",
+    sub:"TO-001 · Object — nail or screw (front)",
+    veh:"Volkswagen Golf · 2021 · Petrol", loc:"A2 motorway, exit 14 — Madrid",
+    evt:"Technical breakdown — foreign object / flat tyre",
+    reasoning:"Customer explicitly reports a nail or screw embedded through the tyre after striking road debris. Vehicle is stationary and undriveable. This is a foreign object penetration event, not a standard puncture or blowout — selecting Tyre — Object in Tyre (nail/screw). Dispatch should bring a replacement tyre; roadside repair unlikely due to through-tread penetration.",
+    conf:94, think:9200,
+  },
+  {
+    groupName:"Battery — discharged", option:"Battery discharged (lights on)",
+    dtypeCode:"BD", subcatId:"BD-001",
+    lines:[
+      {d:0,    s:'Agent',    t:"Allianz assistance, good morning."},
+      {d:1800, s:'Customer', t:"Good morning. My car won't start — completely dead, nothing happens when I turn the key."},
+      {d:4500, s:'Agent',    t:"What car is it and how old is the battery?"},
+      {d:6000, s:'Customer', t:"SEAT Ibiza, 2019. I left the interior lights on overnight — the battery must be completely flat."},
+      {d:9000, s:'Agent',    t:"And your current location?"},
+      {d:10800,s:'Customer', t:"Carrefour car park in Valencia, level 2."},
+    ],
+    hl:["left the interior lights on overnight","battery must be completely flat"],
+    category:"Battery — Discharged",
+    sub:"BD-001 · Discharged — lights left on",
+    veh:"SEAT Ibiza · 2019 · Petrol", loc:"Carrefour car park, level 2 — Valencia",
+    evt:"Technical breakdown — flat battery (known cause)",
+    reasoning:"Customer confirms battery is flat due to interior lights being left on overnight — clear parasitic drain event with known cause. No mechanical failure suspected. Classification is Battery — Discharged (lights on). Jump start likely sufficient; battery health check recommended post-start given overnight full discharge.",
+    conf:97, think:8700,
+  },
+  {
+    groupName:"Engine — coolant leak", option:"Coolant lack / hose leak",
+    dtypeCode:"EC", subcatId:"EC-002",
+    lines:[
+      {d:0,    s:'Agent',    t:"Allianz roadside, how can I help?"},
+      {d:1600, s:'Customer', t:"Hello, the engine warning light came on and there's steam coming from under the bonnet."},
+      {d:4200, s:'Agent',    t:"Have you been able to pull over safely?"},
+      {d:5800, s:'Customer', t:"Yes I have. The temperature gauge went into the red — I think the coolant is leaking somewhere."},
+      {d:8800, s:'Agent',    t:"What vehicle are you in and whereabouts?"},
+      {d:10500,s:'Customer', t:"Renault Clio, just outside Seville on the N-IV, near km 530."},
+    ],
+    hl:["coolant is leaking","temperature gauge went into the red","steam coming from under the bonnet"],
+    category:"Engine — Coolant / Overheating",
+    sub:"EC-002 · Coolant — leak (water hose)",
+    veh:"Renault Clio · Petrol", loc:"N-IV road, km 530 — Seville outskirts",
+    evt:"Technical breakdown — coolant leak / overheating",
+    reasoning:"Customer reports steam from bonnet, temperature gauge in red, and suspected coolant leak. Engine has been shut down preventatively. Visual steam indicates active coolant loss — likely hose failure or radiator breach. Engine must not be restarted until coolant system is inspected. Dispatch requires technician with coolant and hose repair capability.",
+    conf:91, think:8500,
+  },
+  {
+    groupName:"Tyre — burst/blowout", option:"Tyre burst/blowout",
+    dtypeCode:"TB", subcatId:"TB-001",
+    lines:[
+      {d:0,    s:'Agent',    t:"Allianz RSA, how can I help?"},
+      {d:1800, s:'Customer', t:"My car is pulling hard to the left — it's very difficult to control."},
+      {d:4400, s:'Agent',    t:"Did you hear any noise before it started pulling?"},
+      {d:6200, s:'Customer', t:"A very loud bang on the motorway — I think the front tyre just blew out completely."},
+      {d:9200, s:'Agent',    t:"Please stay in your vehicle if it's safe. What's your location?"},
+      {d:11000,s:'Customer', t:"M-30 ring road in Madrid, near junction 5. Front left is completely flat."},
+    ],
+    hl:["very loud bang","front tyre just blew out completely","Front left is completely flat"],
+    category:"Tyre — Burst / Blowout",
+    sub:"TB-001 · Burst — front left, high speed",
+    veh:"Unknown — details pending", loc:"M-30 ring road, junction 5 — Madrid",
+    evt:"Technical breakdown — tyre burst (high speed)",
+    reasoning:"Customer reports a sudden loud bang followed by severe pull to the left at motorway speed — consistent with a high-speed tyre burst on the front left. Vehicle is currently driveable at reduced speed but unsafe to continue. Requires roadside tyre replacement. Rim inspection also recommended given the reported force of the event.",
+    conf:96, think:9000,
+  },
+];
+
+// ─── BUILD OASIS 2-LEVEL MANUAL UI ─────────────────────────────────────────
+let selectedDtype = null, selectedSubcat = null;
+
+function buildDtypeList(highlightCode=null) {
+  const el = document.getElementById('dtype-list');
+  el.innerHTML = '';
+  OASIS.forEach(g => {
+    const row = document.createElement('div');
+    row.className = 'dtype-item' + (g.code === selectedDtype ? ' selected' : '') + (g.code === highlightCode ? ' highlighted' : '');
+    row.innerHTML = '<span class="dtype-code">' + g.code + '</span>' + g.label;
+    row.onclick = () => {
+      selectedDtype = g.code;
+      selectedSubcat = null;
+      document.getElementById('mval').textContent = '—';
+      buildDtypeList(highlightCode);
+      buildSubcatList(g.code);
+    };
+    el.appendChild(row);
+  });
+  document.getElementById('dtype-cnt').textContent = OASIS.length;
+}
+
+function buildSubcatList(code, highlightId=null) {
+  const el = document.getElementById('subcat-list');
+  const grp = OASIS.find(g => g.code === code);
+  if (!grp) { el.innerHTML = '<div class="subcat-placeholder"><span style="font-size:22px">←</span><span>Select a damage type<br>to see subcategory IDs</span></div>'; return; }
+  el.innerHTML = '';
+  document.getElementById('subcat-cnt').textContent = grp.subs.length;
+  grp.subs.forEach(s => {
+    const row = document.createElement('div');
+    row.className = 'subcat-item' + (s.id === selectedSubcat ? ' selected' : '') + (s.id === highlightId ? ' highlighted' : '');
+    row.innerHTML = '<span class="subcat-code">' + s.id + '</span>' + s.name;
+    row.onclick = () => {
+      selectedSubcat = s.id;
+      document.getElementById('mval').textContent = s.id + ' — ' + s.name;
+      buildSubcatList(code, highlightId);
+    };
+    el.appendChild(row);
+  });
+}
+
+function scrollDtypeToCode(code) {
+  const items = document.querySelectorAll('.dtype-item');
+  items.forEach(it => { if (it.querySelector('.dtype-code')?.textContent === code) it.scrollIntoView({behavior:'smooth',block:'center'}); });
+}
+function scrollSubcatToId(id) {
+  const items = document.querySelectorAll('.subcat-item');
+  items.forEach(it => { if (it.querySelector('.subcat-code')?.textContent === id) it.scrollIntoView({behavior:'smooth',block:'center'}); });
+}
+
+// ─── BUILD AI GROUP GRID ────────────────────────────────────────────────────
+function buildGroupGrid(state='idle', selectedGroup=null) {
+  const grid = document.getElementById('groups-grid');
+  grid.innerHTML = '';
+  AI_GROUPS.forEach(g => {
+    const pill = document.createElement('div');
+    pill.className = 'grp-pill';
+    pill.textContent = g.name;
+    if (state === 'scanning') pill.classList.add('scanning');
+    if (state === 'selected') {
+      if (g.name === selectedGroup) pill.classList.add('selected');
+      else pill.classList.add('dimmed');
+    }
+    grid.appendChild(pill);
+  });
+}
+
+function buildSubOptions(groupName, state='idle', selectedOption=null) {
+  const grp = AI_GROUPS.find(g => g.name === groupName);
+  if (!grp) return;
+  const wrap = document.getElementById('sub-options');
+  wrap.innerHTML = '';
+  grp.options.forEach(opt => {
+    const row = document.createElement('div');
+    row.className = 'sub-option';
+    if (state === 'scanning') row.classList.add('scanning');
+    if (state === 'selected') {
+      if (opt === selectedOption) {
+        row.classList.add('selected');
+        row.innerHTML = '<div class="sub-option-check">✓</div>' + opt;
+      } else {
+        row.classList.add('dimmed');
+        row.textContent = opt;
+      }
+    } else {
+      row.textContent = opt;
+    }
+    wrap.appendChild(row);
+  });
+}
+
+// ─── CALL LOGIC ─────────────────────────────────────────────────────────────
+let sc=0, running=false, timerInt=null, secs=0, tos=[];
+let evalChartInst=null, costChartInst=null;
+
+function setScenario(idx) {
+  if (running) return;
+  sc = idx;
+  for (let i=0;i<4;i++) document.getElementById('sc'+i).classList.toggle('active', i===idx);
+}
+
+function appendTranscriptLine(line, data) {
+  const placeholder = '<span style="color:var(--t3);">Waiting for call to start…</span>';
+  ['tbox-m','tbox-a'].forEach(id => {
+    const tbox = document.getElementById(id);
+    if (tbox.innerHTML.includes('Waiting')) tbox.innerHTML = '';
+    const div = document.createElement('div');
+    div.className = 'tline';
+    let txt = line.t;
+    data.hl.forEach(h => { txt = txt.replace(h, '<span class="hl">'+h+'</span>'); });
+    div.innerHTML = '<span class="spk '+(line.s==='Agent'?'agent':'cust')+'">'+line.s+'</span>'+txt;
+    tbox.appendChild(div);
+    tbox.scrollTop = tbox.scrollHeight;
+  });
+}
+
+function startCall() {
+  if (running) return;
+  running = true;
+  document.getElementById('sbtn').disabled = true;
+  document.getElementById('rbtn').disabled = false;
+  const dot = document.getElementById('cdot');
+  dot.style.background = '#34d399'; dot.style.animation = 'pulse 2s infinite';
+  document.getElementById('cstatus').textContent = 'Live call in progress';
+  secs = 0;
+  timerInt = setInterval(() => {
+    secs++;
+    document.getElementById('ctimer').textContent = Math.floor(secs/60)+':'+String(secs%60).padStart(2,'0');
+  }, 1000);
+
+  const data = SCENARIOS[sc];
+  document.getElementById('tbox-m').innerHTML = '';
+  document.getElementById('tbox-a').innerHTML = '';
+
+  // Manual: highlight damage type column after ~5s
+  tos.push(setTimeout(() => {
+    document.getElementById('stress').style.display = 'block';
+    buildDtypeList(data.dtypeCode);
+    scrollDtypeToCode(data.dtypeCode);
+  }, 5000));
+
+  // Transcript lines (both panels)
+  data.lines.forEach(line => {
+    tos.push(setTimeout(() => appendTranscriptLine(line, data), line.d));
+  });
+
+  // AI: start scanning groups
+  tos.push(setTimeout(() => {
+    document.getElementById('pip1').className = 'step-pip active';
+    document.getElementById('step1-status').textContent = 'Scanning 38 groups…';
+    document.getElementById('step1-status').style.color = 'var(--blue)';
+    buildGroupGrid('scanning');
+  }, data.think));
+
+  // AI: step 1 resolved
+  tos.push(setTimeout(() => {
+    document.getElementById('step1-status').textContent = '✓ ' + data.groupName;
+    document.getElementById('step1-status').style.color = 'var(--green)';
+    document.getElementById('pip1').className = 'step-pip done';
+    buildGroupGrid('selected', data.groupName);
+    document.getElementById('step2-wrap').style.opacity = '1';
+    document.getElementById('pip2').className = 'step-pip active';
+    document.getElementById('step2-status').textContent = 'Scanning options…';
+    document.getElementById('step2-status').style.color = 'var(--blue)';
+    buildSubOptions(data.groupName, 'scanning');
+  }, data.think + 900));
+
+  // AI: step 2 resolved — fill everything
+  tos.push(setTimeout(() => {
+    document.getElementById('step2-status').textContent = '✓ ' + data.option;
+    document.getElementById('step2-status').style.color = 'var(--green)';
+    document.getElementById('pip2').className = 'step-pip done';
+    buildSubOptions(data.groupName, 'selected', data.option);
+
+    document.getElementById('ai-result').style.display = 'block';
+    document.getElementById('result-label').textContent = '✓ ' + data.category;
+    document.getElementById('conf-pct').textContent = data.conf + '%';
+    setTimeout(() => { document.getElementById('cbar').style.width = data.conf + '%'; }, 100);
+
+    // Reasoning
+    document.getElementById('reasoning-text').textContent = data.reasoning;
+    document.getElementById('reasoning-text').style.color = 'var(--t2)';
+
+    // Extracted fields
+    const fields = {'f-cat':data.category,'f-sub':data.sub,'f-veh':data.veh,'f-loc':data.loc,'f-evt':data.evt};
+    Object.entries(fields).forEach(([id,val]) => {
+      const el = document.getElementById(id); el.textContent = val; el.className = 'fv filled';
+    });
+    document.getElementById('ostat').textContent = '✓ Ready to accept';
+    document.getElementById('ostat').className = 'ostat ready';
+
+    // Manual: highlight the correct damage ID
+    buildDtypeList(data.dtypeCode);
+    buildSubcatList(data.dtypeCode, data.subcatId);
+    scrollDtypeToCode(data.dtypeCode);
+    setTimeout(() => scrollSubcatToId(data.subcatId), 500);
+  }, data.think + 1900));
+}
+
+function resetCall() {
+  running = false;
+  clearInterval(timerInt);
+  tos.forEach(clearTimeout); tos = [];
+  secs = 0;
+  document.getElementById('ctimer').textContent = '0:00';
+  const dot = document.getElementById('cdot');
+  dot.style.background = 'var(--t3)'; dot.style.animation = 'none';
+  document.getElementById('cstatus').textContent = 'Select a scenario and press Start call';
+  const blank = '<span style="color:var(--t3);">Waiting for call to start…</span>';
+  document.getElementById('tbox-m').innerHTML = blank;
+  document.getElementById('tbox-a').innerHTML = blank;
+  // reset AI
+  document.getElementById('pip1').className = 'step-pip';
+  document.getElementById('pip2').className = 'step-pip';
+  document.getElementById('step1-status').textContent = '—';
+  document.getElementById('step1-status').style.color = 'var(--t3)';
+  document.getElementById('step2-status').textContent = '—';
+  document.getElementById('step2-status').style.color = 'var(--t3)';
+  document.getElementById('step2-wrap').style.opacity = '0.3';
+  document.getElementById('ai-result').style.display = 'none';
+  document.getElementById('cbar').style.width = '0%';
+  buildGroupGrid('idle');
+  document.getElementById('sub-options').innerHTML = '';
+  document.getElementById('reasoning-text').innerHTML = '<span style="color:var(--t4);">Awaiting transcript…</span>';
+  ['f-cat','f-sub','f-veh','f-loc','f-evt'].forEach(id => {
+    const el = document.getElementById(id); el.textContent='—'; el.className='fv';
+  });
+  document.getElementById('ostat').textContent = 'Pending';
+  document.getElementById('ostat').className = 'ostat';
+  // reset manual
+  document.getElementById('stress').style.display = 'none';
+  document.getElementById('mval').textContent = '—';
+  selectedDtype = null; selectedSubcat = null;
+  buildDtypeList();
+  document.getElementById('subcat-list').innerHTML = '<div class="subcat-placeholder"><span style="font-size:22px">←</span><span>Select a damage type<br>to see subcategory IDs</span></div>';
+  document.getElementById('subcat-cnt').textContent = '—';
+  document.getElementById('sbtn').disabled = false;
+  document.getElementById('rbtn').disabled = true;
+}
+
+function switchSimTab(name) {
+  document.getElementById('sim-manual').style.display = name==='manual' ? 'block' : 'none';
+  document.getElementById('sim-ai').style.display     = name==='ai'     ? 'block' : 'none';
+  document.getElementById('stab-manual').classList.toggle('active', name==='manual');
+  document.getElementById('stab-ai').classList.toggle('active', name==='ai');
+}
+
+// ─── TABS ───────────────────────────────────────────────────────────────────
+function switchTab(name) {
+  ['live','eval','arch'].forEach(n => {
+    document.getElementById('panel-'+n).classList.toggle('active', n===name);
+  });
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    t.classList.toggle('active', ['live','eval','arch'][i]===name);
+  });
+  if (name==='eval' && !evalChartInst) setTimeout(buildEvalChart, 80);
+  if (name==='arch' && !costChartInst) setTimeout(buildCostChart, 80);
+}
+
+// ─── EVAL CHART ─────────────────────────────────────────────────────────────
+const VERSIONS=[
+  {note:'Initial 21 categories. Raw exact match of 56.8% looked poor — AI was selecting more specific categories than humans under time pressure.',exact:56.8,ai_spec:10.6,almost:4.7,hum_spec:10.2,no_pred:3.4,wrong:1.5,total:84.8},
+  {note:'28 categories added from eval findings. Exact match drops slightly but Total Appropriate rises — AI now correctly uses new specific categories.',exact:51.5,ai_spec:17.2,almost:4.5,hum_spec:10.5,no_pred:0.1,wrong:2.7,total:86.7},
+  {note:'Full nested hierarchy, 68 categories. Exact match drops further but AI punts to OTHER far less. Small uptick in wrong from disambiguation errors.',exact:47.3,ai_spec:19.8,almost:3.6,hum_spec:7.3,no_pred:3.9,wrong:5.3,total:83.5},
+];
+const CLRS=['#4f8ef7','#34d399','#a3e635','#fbbf24','#9ca3af','#f87171'];
+const CLBLS=['Exact match','AI more specific (correct)','Almost correct','Human more specific','No prediction','Genuinely wrong'];
+let currentVer=0;
+function showVer(idx) {
+  currentVer=idx;
+  for(let i=0;i<3;i++) document.getElementById('vb'+i).classList.toggle('active',i===idx);
+  document.getElementById('ver-note').textContent=VERSIONS[idx].note;
+  if(evalChartInst){
+    const v=VERSIONS[idx]; const d=[v.exact,v.ai_spec,v.almost,v.hum_spec,v.no_pred,v.wrong];
+    evalChartInst.data.datasets.forEach((ds,i)=>{ds.data=[d[i]];});
+    evalChartInst.update();
+  }
+}
+function buildEvalChart() {
+  document.getElementById('ver-note').textContent=VERSIONS[0].note;
+  const v=VERSIONS[0]; const d=[v.exact,v.ai_spec,v.almost,v.hum_spec,v.no_pred,v.wrong];
+  const ctx=document.getElementById('evalChart').getContext('2d');
+  evalChartInst=new Chart(ctx,{type:'bar',data:{labels:['Breakdown (850 sessions)'],datasets:CLBLS.map((label,i)=>({label,data:[d[i]],backgroundColor:CLRS[i],borderWidth:0,borderRadius:2}))},
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
+      scales:{x:{stacked:true,max:100,ticks:{callback:v=>v+'%',color:'#606070',font:{size:11}},grid:{color:'rgba(255,255,255,0.05)'}},y:{stacked:true,ticks:{color:'#9090a0',font:{size:12}},grid:{display:false}}},
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.raw.toFixed(1)+'%'}}}}});
+  const leg=document.getElementById('eval-legend');
+  leg.innerHTML=CLBLS.map((l,i)=>'<span class="li"><span class="ls" style="background:'+CLRS[i]+'"></span>'+l+'</span>').join('');
+}
+function buildCostChart() {
+  const ctx=document.getElementById('costChart').getContext('2d');
+  costChartInst=new Chart(ctx,{type:'bar',data:{labels:['GPT-4.1','GPT-4.1 mini'],datasets:[{label:'Relative token cost',data:[8,1],backgroundColor:['#f87171','#34d399'],borderWidth:0,borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
+      scales:{x:{max:10,ticks:{callback:v=>v+'x',color:'#606070',font:{size:11}},grid:{color:'rgba(255,255,255,0.05)'}},y:{ticks:{color:'#9090a0',font:{size:13}},grid:{display:false}}},
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.raw+'× relative token cost'}}}}});
+}
+
+// init
+buildDtypeList();
+buildGroupGrid('idle');
+</script>
+</body>
+</html>
